@@ -74,6 +74,19 @@ docker compose up
 
 `docker compose up` 이 정본 진입점입니다. 로컬 편의용 래퍼(`marc.sh`)도 제공됩니다.
 
+```{important}
+**최초 기동은 오래 걸립니다 — 멈춘 게 아닙니다.** 월드 구성(씬·사람 포즈·랜드마크·로봇)과
+셰이더 컴파일에 **수 분**(보통 2~5분, 캐시가 비어 있는 첫 실행은 더 오래)이 걸립니다. 이 동안
+**뷰포트는 검정 화면**이고 제목이 *"New Stage\*"* 로, 로딩 바가 멈춘 것처럼 보일 수 있습니다.
+이는 정상이며 **그대로 기다리세요(강제 종료 금지).** 아래 로그가 보여야 기동 완료입니다:
+
+    [Runtime] Startup complete in <N>s
+    Auto-plan: waiting for a participant to register...
+
+이때 뷰포트에 chungmu 씬이 나타나고, 플랫폼이 참가자 앱의 register 를 받을 준비가 됩니다.
+진행 상황은 `docker compose logs -f` 로 확인하세요.
+```
+
 ### 5. SDK 설치
 
 ```bash

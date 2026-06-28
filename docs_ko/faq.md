@@ -2,6 +2,17 @@
 
 ## 트러블슈팅
 
+### 뷰포트가 검정 화면 / 첫 실행 때 멈춘 것처럼 보임
+
+**증상:** `docker compose up` 후 Isaac Sim 창의 **뷰포트가 검정**이고 제목이 *"New Stage\*"*,
+로딩 바가 멈춘 듯 보입니다.
+
+**정상입니다 — 기다리세요.** 최초 기동은 월드(씬·사람 포즈·랜드마크·로봇)를 구성하고 셰이더를
+컴파일하므로 **수 분**(보통 2~5분, 첫 실행은 더 오래) 걸립니다. **강제 종료하지 마세요.** 로그에
+`[Runtime] Startup complete in <N>s` 와 이어서 `Auto-plan: waiting for a participant to
+register...` 가 나오면 기동 완료이며, 그때 씬이 나타납니다. 진행은 `docker compose logs -f` 로
+확인하세요.
+
 ### ROS 2 Humble <-> Isaac Sim Python 충돌
 
 **증상:** 플랫폼 기동 시 import 오류 / 잘못된 Python; 참가자 SDK(Python 3.10)와 Isaac Sim(Python

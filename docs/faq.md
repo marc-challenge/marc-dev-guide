@@ -2,6 +2,18 @@
 
 ## Troubleshooting
 
+### Viewport is black / looks frozen on first launch
+
+**Symptom:** after `docker compose up` the Isaac Sim window shows a **black viewport**, the
+title reads *"New Stage\*"*, and the loading bar seems stuck.
+
+**This is normal — wait.** First startup builds the world (scene, people poses, landmarks,
+robot) and compiles shaders, which takes **several minutes** (2–5 min typical, longer on the
+very first run). Do **not** kill it. Startup is done when the logs show
+`[Runtime] Startup complete in <N>s` followed by
+`Auto-plan: waiting for a participant to register...`; the scene then appears. Follow
+progress with `docker compose logs -f`.
+
 ### ROS 2 Humble <-> Isaac Sim Python conflict
 
 **Symptom:** import errors / wrong Python when launching the platform; the participant SDK

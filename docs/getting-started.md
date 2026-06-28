@@ -78,6 +78,20 @@ docker compose up
 `docker compose up` is the canonical entry point. A convenience wrapper (`marc.sh`) is also
 provided for local use.
 
+```{important}
+**First startup is slow — it is not frozen.** Building the world (scene, people poses,
+landmarks, robot) plus shader compilation takes **several minutes** (typically 2–5 min, and
+longer on the very first run while caches warm up). During this time the **viewport stays
+black**, the title may read *"New Stage\*"*, and the loading bar can appear stuck. This is
+normal — **wait, do not kill it.** Startup is complete only when the logs show:
+
+    [Runtime] Startup complete in <N>s
+    Auto-plan: waiting for a participant to register...
+
+At that point the chungmu scene appears in the viewport and the platform is ready for your
+agent to register. Watch progress with `docker compose logs -f`.
+```
+
 ### 5. Install the SDK
 
 ```bash
