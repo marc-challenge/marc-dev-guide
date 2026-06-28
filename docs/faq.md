@@ -17,6 +17,18 @@ Check the **NVIDIA Container Runtime** is installed, the host driver is current,
 container requests the GPU (`--gpus all` or the compose `deploy.resources` block). Verify
 with `nvidia-smi` on the host and inside the container.
 
+### `docker compose up` fails: `unknown or invalid runtime name: nvidia`
+
+The compose file requests `runtime: nvidia`. Even if `docker run --gpus all` works on your
+host (CDI path), the **named `nvidia` runtime may not be registered** with the Docker daemon.
+Register it once and restart Docker:
+
+```bash
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+docker info | grep -i runtimes   # should now list "nvidia"
+```
+
 ### DDS communication not working
 
 Confirm both machines share the **same `ROS_DOMAIN_ID`**, are on the same LAN, and that the

@@ -16,6 +16,18 @@
 **NVIDIA Container Runtime** 설치, 호스트 드라이버 최신화, 컨테이너의 GPU 요청(`--gpus all` 또는
 compose `deploy.resources` 블록)을 확인합니다. 호스트와 컨테이너 내부에서 `nvidia-smi` 로 검증합니다.
 
+### `docker compose up` 실패: `unknown or invalid runtime name: nvidia`
+
+compose 파일은 `runtime: nvidia` 를 요구합니다. 호스트에서 `docker run --gpus all` 이 동작하더라도
+(CDI 경로) Docker 데몬에 **이름이 `nvidia` 인 런타임이 등록되지 않았을 수** 있습니다. 한 번 등록하고
+Docker 를 재시작하세요:
+
+```bash
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+docker info | grep -i runtimes   # 이제 "nvidia" 가 보여야 함
+```
+
 ### DDS 통신 안 됨
 
 두 머신이 **동일 `ROS_DOMAIN_ID`** 와 동일 LAN 을 공유하는지, 방화벽이 DDS(UDP, 디스커버리용
