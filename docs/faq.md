@@ -29,7 +29,7 @@ The Dockerfiles COPY `simulation_app/`, `resources/`, and `scenarios/`, so the *
 context must be the repo root**:
 
 ```bash
-docker build -f deploy/marc-dev-platform/Dockerfile.practice -t marc-platform:practice .
+docker build -f marc-dev-platform/Dockerfile.practice -t marc-platform:practice .
 ```
 
 Also make sure you pulled the Isaac Sim **base image** and accepted its license (the

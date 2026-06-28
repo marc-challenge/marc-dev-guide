@@ -27,24 +27,49 @@ cd marc-starter-kit
 The starter kit bundles the SDK, the demo agent, Docker recipes, the public scenario, and
 the **chungmu** practice background USD.
 
-### 2. Build the platform / trainer locally (Dockerfile-only)
+### 2. Log in to NVIDIA NGC (`nvcr.io`)
+
+The platform/trainer images are **Dockerfile-only**, so you pull the Isaac Sim base image
+(`nvcr.io/nvidia/isaac-sim:5.1.0`) **under your own account** and build locally — pulling it
+yourself means **you accept the Isaac Sim EULA as the licensee**. That requires an NGC login.
+
+1. **Create a free account** at [ngc.nvidia.com](https://ngc.nvidia.com) and sign in.
+2. **Generate an API key** — top-right profile → **Setup → Generate API Key** (or
+   *Generate Personal Key*). The key is **shown only once**; copy it immediately.
+3. **Log in to the registry.** The username is the literal string `$oauthtoken`; the
+   password is your API key.
+
+```bash
+docker login nvcr.io
+# Username: $oauthtoken      ← this exact string, no quotes
+# Password: <your NGC API key>
+```
+
+```{tip}
+Non-interactive (CI) login:
+`echo "<API_KEY>" | docker login nvcr.io -u '$oauthtoken' --password-stdin`.
+The `marc.sh setup` wrapper only *reminds* you to log in — it never logs in for you, since
+the credentials are yours.
+```
+
+### 3. Build the platform / trainer locally (Dockerfile-only)
 
 The simulation platform and trainer images are **Dockerfile-only**: prebuilt images are
-**not** redistributed (Isaac Sim redistribution license). You pull the base image yourself
-and build locally.
+**not** redistributed (Isaac Sim redistribution license). With NGC login in place, build
+locally — the build pulls the base image you just authenticated for.
 
 ```bash
 # Build context is the repo root (the Dockerfile COPYs simulation_app/, resources/, scenarios/).
-docker build -f deploy/marc-dev-platform/Dockerfile.practice -t marc-platform:practice .
+docker build -f marc-dev-platform/Dockerfile.practice -t marc-platform:practice .
 ```
 
 ```{note}
-The first build pulls the Isaac Sim base image and requires accepting its license. This
-step needs internet — that is fine, the **build phase is online**. Only the *evaluation
+The first build pulls the Isaac Sim base image (hence the NGC login above). This step
+needs internet — that is fine, the **build phase is online**. Only the *evaluation
 runtime* is offline.
 ```
 
-### 3. Bring up the runtime
+### 4. Bring up the runtime
 
 ```bash
 docker compose up
@@ -53,13 +78,13 @@ docker compose up
 `docker compose up` is the canonical entry point. A convenience wrapper (`marc.sh`) is also
 provided for local use.
 
-### 4. Install the SDK
+### 5. Install the SDK
 
 ```bash
 pip install marc-sdk==2026.1.0
 ```
 
-### 5. Run the demo agent
+### 6. Run the demo agent
 
 ```bash
 # From the demo directory; set your team id / token first.
@@ -86,6 +111,7 @@ published image tags and wheel version before release.
 |---|---|
 | OS / HW | Ubuntu **22.04**, NVIDIA **RTX** GPU with sufficient VRAM. |
 | Docker | Docker + **NVIDIA Container Runtime** (GPU pass-through). |
+| NGC account | **NVIDIA NGC account** (free) + **API key** — required to pull the Isaac Sim base image from `nvcr.io` (see [Quickstart step 2](#2-log-in-to-nvidia-ngc-nvcr-io)). |
 | Python | Participant SDK = **3.10** (ROS 2 Humble). Platform-internal = 3.11 (Isaac Sim, separate shell). |
 | Middleware | ROS 2 **Humble**, **Fast DDS**. Align `ROS_DOMAIN_ID` across machines. |
 | Topology | Your agent runs on **separate hardware** from the platform (same LAN / same ROS domain, DDS over the network). |
