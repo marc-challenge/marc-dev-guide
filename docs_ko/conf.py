@@ -1,6 +1,6 @@
 # MARC 2026 Developer Guide — Sphinx configuration (Korean)
 #
-# Built by the Korean RTD project via .readthedocs.ko.yaml (sphinx.configuration:
+# Built by the Korean RTD project via docs_ko/.readthedocs.yaml (sphinx.configuration:
 # docs_ko/conf.py), linked as a Translation of the English project. This config is
 # identical to docs/conf.py except language='ko' (set at the bottom).
 # Versions/tags below are PROVISIONAL until the release freeze.

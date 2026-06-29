@@ -18,11 +18,13 @@ sphinx:
 
 # Bilingual setup (RESOLVED — per-language projects via RTD Translations):
 #   - English (primary) = this file -> docs/conf.py.
-#   - Korean = .readthedocs.ko.yaml -> docs_ko/conf.py, built by a SEPARATE RTD
+#   - Korean = docs_ko/.readthedocs.yaml -> docs_ko/conf.py, built by a SEPARATE RTD
 #     project linked as a Translation of the English project (gives the EN/KO
 #     language toggle). Both projects use the same repo/branch.
-# The only out-of-repo step is creating + linking the Korean project on the RTD
-# dashboard; both config files live here.
+# RTD forces the config filename to be .readthedocs.yaml, so the Korean config lives
+# in the docs_ko/ subdirectory (set the Korean project's "Build configuration file"
+# to docs_ko/.readthedocs.yaml). The only out-of-repo step is creating + linking the
+# Korean project on the RTD dashboard; both config files live in this repo.
 
 # formats:
 #   - pdf

@@ -2,7 +2,7 @@
 #
 # Built by the primary RTD project via .readthedocs.yaml (sphinx.configuration: docs/conf.py).
 # The Korean counterpart is docs_ko/conf.py (language='ko'), built by a separate RTD
-# project linked as a Translation (see .readthedocs.ko.yaml).
+# project linked as a Translation (see docs_ko/.readthedocs.yaml).
 # Versions/tags below are PROVISIONAL until the release freeze.
 
 import os
