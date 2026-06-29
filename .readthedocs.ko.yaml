@@ -1,0 +1,20 @@
+# Read the Docs build config — MARC 2026 Developer Guide (Korean translation)
+# Used by the SEPARATE Korean RTD project, linked as a Translation of the English
+# project (RTD Translations feature). On the Korean project: Admin -> Settings ->
+# "Path for .readthedocs.yaml" = .readthedocs.ko.yaml, then register it as a
+# translation of the English project. Same repo/branch as the English build.
+version: 2
+
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.10"
+
+python:
+  install:
+    - requirements: requirements.txt
+
+sphinx:
+  configuration: docs_ko/conf.py
+  fail_on_warning: false
+  builder: html

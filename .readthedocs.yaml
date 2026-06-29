@@ -16,10 +16,13 @@ sphinx:
   fail_on_warning: false
   builder: html
 
-# Bilingual note (draft): docs/ (en) is the primary build. The Korean build
-# (docs_ko/) is published as a separate RTD language project or a second config,
-# matching the 2025 folder-split pattern. Decide single-project+toggle vs.
-# per-language project before promoting out of draft/.
+# Bilingual setup (RESOLVED — per-language projects via RTD Translations):
+#   - English (primary) = this file -> docs/conf.py.
+#   - Korean = .readthedocs.ko.yaml -> docs_ko/conf.py, built by a SEPARATE RTD
+#     project linked as a Translation of the English project (gives the EN/KO
+#     language toggle). Both projects use the same repo/branch.
+# The only out-of-repo step is creating + linking the Korean project on the RTD
+# dashboard; both config files live here.
 
 # formats:
 #   - pdf
