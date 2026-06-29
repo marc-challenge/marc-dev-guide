@@ -1,5 +1,5 @@
-# Read the Docs build config — MARC 2026 Developer Guide (DRAFT)
-# Ported from the 2025 guide (ubuntu-22.04 / python 3.10). RTD slug: marc-challenge.
+# Read the Docs build config — MARC 2026 Developer Guide (English, primary)
+# ubuntu-22.04 / python 3.10. RTD slug: marc-challenge.
 version: 2
 
 build:

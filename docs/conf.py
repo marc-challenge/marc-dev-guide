@@ -1,9 +1,9 @@
-# MARC 2026 Developer Guide — Sphinx configuration (DRAFT)
+# MARC 2026 Developer Guide — Sphinx configuration (English)
 #
-#
-# NOTE (draft): metadata only. Rename to docs/conf.py (en) and docs_ko/conf.py (ko)
-# when promoting out of draft/. Korean build sets language='ko' and points root_doc
-# at docs_ko/. Versions/tags below are PROVISIONAL until release freeze.
+# Built by the primary RTD project via .readthedocs.yaml (sphinx.configuration: docs/conf.py).
+# The Korean counterpart is docs_ko/conf.py (language='ko'), built by a separate RTD
+# project linked as a Translation (see .readthedocs.ko.yaml).
+# Versions/tags below are PROVISIONAL until the release freeze.
 
 import os
 import sys
