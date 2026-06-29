@@ -16,7 +16,7 @@
 # 호스트/로컬 개발 전용(ROS2 Humble source 후): 스타터킷 *루트*에서 설치 —
 pip install -e .                                   # pyproject.toml 이 있는 키트 루트에서 실행(marc_sdk/ 안 아님)
 # 또는 릴리스 wheel:
-pip install marc_sdk-2026.1.0-py3-none-any.whl     # marc-starter-kit GitHub Release 첨부
+pip install marc_sdk-2026.1.0-py3-none-any.whl     # marc-starter-kit GitHub Release 첨부 (PyPI 미배포)
 ```
 
 ```python

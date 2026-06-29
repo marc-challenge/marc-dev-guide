@@ -17,7 +17,7 @@ your VLA and navigation logic. For raw topic details see the
 # Host-side / local dev only (ROS2 Humble sourced): install from the starter-kit ROOT —
 pip install -e .                                   # run where pyproject.toml lives (kit root), NOT inside marc_sdk/
 # or the release wheel:
-pip install marc_sdk-2026.1.0-py3-none-any.whl     # attached to the marc-starter-kit GitHub Release
+pip install marc_sdk-2026.1.0-py3-none-any.whl     # attached to the marc-starter-kit GitHub Release (not published to PyPI)
 ```
 
 ```python

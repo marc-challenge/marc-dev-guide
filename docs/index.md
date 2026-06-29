@@ -57,3 +57,8 @@ See [FAQ → Notices](faq.md#notices) for the full text.
 
 This guide is published as **versioned documentation** on Read the Docs and is aligned to
 release tags (`v2026.x`). The current draft targets release **2026.1.0** (provisional).
+
+## Contact
+
+For questions about the challenge, the platform, or this guide, email
+**[marc2026@iotcoss.ac.kr](mailto:marc2026@iotcoss.ac.kr)**.
