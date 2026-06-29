@@ -51,7 +51,7 @@ Dockerfile 이 `simulation_app/`, `resources/`, `scenarios/` 를 COPY 하므로 
 루트** 여야 합니다:
 
 ```bash
-docker build -f marc-dev-platform/Dockerfile.practice -t marc-platform:practice .
+docker build -f simulation-platform/Dockerfile.practice -t marc-platform:practice .
 ```
 
 또한 Isaac Sim **base 이미지** 를 pull 하고 라이선스에 동의했는지 확인하십시오(플랫폼은

@@ -58,7 +58,7 @@ docker login nvcr.io
 
 ```bash
 # 빌드 컨텍스트는 리포 루트입니다(Dockerfile 이 simulation_app/, resources/, scenarios/ 를 COPY).
-docker build -f marc-dev-platform/Dockerfile.practice -t marc-platform:practice .
+docker build -f simulation-platform/Dockerfile.practice -t marc-platform:practice .
 ```
 
 ```{note}

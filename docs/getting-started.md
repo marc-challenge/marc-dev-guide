@@ -29,7 +29,7 @@ the **chungmu** practice background USD.
 
 ### 2. Log in to NVIDIA NGC (`nvcr.io`)
 
-The platform/trainer images are **Dockerfile-only**, so you pull the Isaac Sim base image
+The platform / dataset-gen images are **Dockerfile-only**, so you pull the Isaac Sim base image
 (`nvcr.io/nvidia/isaac-sim:5.1.0`) **under your own account** and build locally — pulling it
 yourself means **you accept the Isaac Sim EULA as the licensee**. That requires an NGC login.
 
@@ -52,15 +52,15 @@ The `marc.sh setup` wrapper only *reminds* you to log in — it never logs in fo
 the credentials are yours.
 ```
 
-### 3. Build the platform / trainer locally (Dockerfile-only)
+### 3. Build the platform / dataset-gen locally (Dockerfile-only)
 
-The simulation platform and trainer images are **Dockerfile-only**: prebuilt images are
+The simulation platform and dataset-gen (object-detection label generator) images are **Dockerfile-only**: prebuilt images are
 **not** redistributed (Isaac Sim redistribution license). With NGC login in place, build
 locally — the build pulls the base image you just authenticated for.
 
 ```bash
 # Build context is the repo root (the Dockerfile COPYs simulation_app/, resources/, scenarios/).
-docker build -f marc-dev-platform/Dockerfile.practice -t marc-platform:practice .
+docker build -f simulation-platform/Dockerfile.practice -t marc-platform:practice .
 ```
 
 ```{note}
