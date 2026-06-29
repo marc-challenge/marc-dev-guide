@@ -92,7 +92,7 @@ At that point the chungmu scene appears in the viewport and the platform is read
 agent to register. Watch progress with `docker compose logs -f`.
 ```
 
-### 5. Install the SDK
+### 5. Reference the SDK
 
 ```bash
 # Standard (Docker submission): marc_sdk ships as SOURCE — your image COPYs it and adds

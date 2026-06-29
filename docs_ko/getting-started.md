@@ -87,7 +87,7 @@ docker compose up
 진행 상황은 `docker compose logs -f` 로 확인하세요.
 ```
 
-### 5. SDK 설치
+### 5. SDK 참조
 
 ```bash
 # 표준(Docker 제출): marc_sdk 는 *소스로* 동봉 — 본인 이미지가 COPY 후 PYTHONPATH 에 추가한다
