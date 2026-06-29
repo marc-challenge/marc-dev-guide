@@ -69,6 +69,13 @@ needs internet — that is fine, the **build phase is online**. Only the *evalua
 runtime* is offline.
 ```
 
+```{note}
+At build time the simulation content is pulled from GHCR by default. **If GHCR access is
+difficult** (network environment, etc.), use the **fallback path** that builds from the
+local content bundled in the kit — the result is identical. (See the starter-kit README for
+the fallback flag and steps.)
+```
+
 ### 4. Bring up the runtime
 
 ```bash

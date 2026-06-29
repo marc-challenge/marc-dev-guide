@@ -66,6 +66,12 @@ docker build -f simulation-platform/Dockerfile.practice -t marc-platform:practic
 필요하며 정상입니다 — **빌드 시점은 온라인**입니다. 인터넷 차단은 *심사 런타임*에만 적용됩니다.
 ```
 
+```{note}
+빌드 시 시뮬레이션 콘텐츠는 기본적으로 GHCR 에서 받습니다. **GHCR 접근이 어려운 경우**(네트워크
+환경 등)에는 키트에 포함된 로컬 콘텐츠로 빌드하는 **폴백 경로**를 사용하세요 — 결과물은 동일합니다.
+(폴백 플래그·절차는 스타터킷 README 참조.)
+```
+
 ### 4. 런타임 기동
 
 ```bash
