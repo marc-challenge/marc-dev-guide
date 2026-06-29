@@ -12,11 +12,12 @@ your VLA and navigation logic. For raw topic details see the
 ### Install and initialize
 
 ```bash
-# Standard (Docker) flow: the SDK is bundled in the image — no install needed.
-# For host-side / local use only (ROS2 Humble sourced), install from the release wheel:
+# Standard (Docker submission): marc_sdk ships as SOURCE — your image COPYs it and adds
+#   it to PYTHONPATH (see demo/Dockerfile). No pip step needed.
+# Host-side / local dev only (ROS2 Humble sourced): install from the starter-kit ROOT —
+pip install -e .                                   # run where pyproject.toml lives (kit root), NOT inside marc_sdk/
+# or the release wheel:
 pip install marc_sdk-2026.1.0-py3-none-any.whl     # attached to the marc-starter-kit GitHub Release
-# or editable from the cloned starter-kit:
-pip install -e ./marc_sdk
 ```
 
 ```python

@@ -11,11 +11,12 @@
 ### 설치 및 초기화
 
 ```bash
-# 표준(Docker) 흐름: SDK 가 이미지에 번들 -> 설치 불필요.
-# 호스트/로컬에서 직접 쓸 때만(ROS2 Humble source 후), 릴리스 wheel 로 설치:
+# 표준(Docker 제출): marc_sdk 는 *소스로* 동봉 — 본인 이미지가 COPY 후 PYTHONPATH 에 추가한다
+#   (demo/Dockerfile 참조). pip 단계 불필요.
+# 호스트/로컬 개발 전용(ROS2 Humble source 후): 스타터킷 *루트*에서 설치 —
+pip install -e .                                   # pyproject.toml 이 있는 키트 루트에서 실행(marc_sdk/ 안 아님)
+# 또는 릴리스 wheel:
 pip install marc_sdk-2026.1.0-py3-none-any.whl     # marc-starter-kit GitHub Release 첨부
-# 또는 클론한 스타터킷에서 editable:
-pip install -e ./marc_sdk
 ```
 
 ```python
