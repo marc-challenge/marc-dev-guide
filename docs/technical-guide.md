@@ -111,8 +111,8 @@ client.run()
 
 ## Baseline agent (demo)
 
-The demo (`participant_sdk/demo`) is a complete, non-interactive agent you can run, read,
-and replace piece by piece.
+The demo (`demo/`, at the starter-kit root) is a complete, non-interactive agent you can
+run, read, and replace piece by piece.
 
 | File | Role |
 |---|---|
@@ -155,11 +155,12 @@ labels are provided **offline for training only**.
 What is provided:
 
 - **FK/IK reference** — dependency-free numpy implementation
-  (`participant_sdk/verification/fk_ik.py`). (Real-time placo IK is environment-dependent
-  and not shipped to participants.)
-- **Motion primitives / waypoint interpolation** — EE waypoints -> joint-angle keyframes
-  with speed limits (`arm_pick.py`, `waypoint_sequence.py`).
-- **Working baseline pick-and-place** that already earns partial score (`arm_pick.py`).
+  (`manipulation/fk_ik.py`). (Real-time placo IK is environment-dependent and not shipped
+  to participants.)
+- **Motion primitives** — pick sequence with speed limits (`manipulation/arm_pick.py`,
+  reused by `demo/arm_pick.py`).
+- **Working baseline pick-and-place** that already earns partial score
+  (`manipulation/arm_pick.py`).
 - **LeRobot demo dataset** — teleoperation (observation, action) episodes for
   imitation-learning / VLA cold-start (LeRobot format).
 - **`manipulation_trainer`** — a sibling of the perception trainer that applies robot joint

@@ -78,12 +78,22 @@ the fallback flag and steps.)
 
 ### 4. Bring up the runtime
 
+The compose file groups services under profiles (`platform`, `dataset-gen`, `manip-trainer`);
+pick the profile you want. For the practice runtime use `platform`:
+
 ```bash
-docker compose up
+# Canonical (compose with profile)
+docker compose -f simulation-platform/docker-compose.yml --profile platform up
+
+# Or the convenience wrapper
+bash simulation-platform/marc.sh platform
 ```
 
-`docker compose up` is the canonical entry point. A convenience wrapper (`marc.sh`) is also
-provided for local use.
+```{note}
+`docker compose up` alone selects no service because every service in
+`simulation-platform/docker-compose.yml` is gated behind a profile. Pass `--profile platform`
+(or use `marc.sh platform`, which sets it for you).
+```
 
 ```{important}
 **First startup is slow — it is not frozen.** Building the world (scene, people poses,
@@ -113,11 +123,16 @@ pip install marc_sdk-2026.1.0-py3-none-any.whl     # attached to the marc-starte
 ### 6. Run the demo agent
 
 ```bash
-# From the demo directory; set your team id / token first.
+# From the kit root, switch to the demo directory; set your team id / token first.
 export MARC_TEAM_ID=u1
 export MARC_TOKEN=<your-token>
-cd participant_sdk/demo
+cd demo                  # demo/ ships at the starter-kit root
 docker compose up        # same command the organizers use to score you
+```
+
+```{note}
+`cd participant_sdk/demo` is the path inside the organizer monorepo. The public starter kit
+ships the demo at `demo/` directly under the kit root.
 ```
 
 You should see the agent register, receive Stage 1 missions, submit groundings, and (in

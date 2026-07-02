@@ -74,11 +74,22 @@ docker build -f simulation-platform/Dockerfile.practice -t marc-platform:practic
 
 ### 4. 런타임 기동
 
+compose 파일은 서비스를 profile (`platform`, `dataset-gen`, `manip-trainer`) 로 묶어두었으므로
+원하는 profile 을 지정해야 합니다. 연습용 런타임은 `platform` 입니다.
+
 ```bash
-docker compose up
+# 정본 (compose + profile 지정)
+docker compose -f simulation-platform/docker-compose.yml --profile platform up
+
+# 또는 편의 래퍼
+bash simulation-platform/marc.sh platform
 ```
 
-`docker compose up` 이 정본 진입점입니다. 로컬 편의용 래퍼(`marc.sh`)도 제공됩니다.
+```{note}
+`docker compose up` 만으로는 어떤 서비스도 뜨지 않습니다. `simulation-platform/docker-compose.yml`
+의 모든 서비스가 profile 로 묶여 있어 `--profile platform` 을 명시해야 합니다 (또는
+`marc.sh platform` 래퍼가 자동으로 지정해줍니다).
+```
 
 ```{important}
 **최초 기동은 오래 걸립니다 — 멈춘 게 아닙니다.** 월드 구성(씬·사람 포즈·랜드마크·로봇)과
@@ -107,11 +118,16 @@ pip install marc_sdk-2026.1.0-py3-none-any.whl     # marc-starter-kit GitHub Rel
 ### 6. 데모 에이전트 실행
 
 ```bash
-# 데모 디렉터리에서. 팀 ID / 토큰을 먼저 설정합니다.
+# 키트 루트에서 demo 디렉터리로 이동. 팀 ID / 토큰을 먼저 설정합니다.
 export MARC_TEAM_ID=u1
 export MARC_TOKEN=<발급-토큰>
-cd participant_sdk/demo
+cd demo                  # demo/ 는 스타터킷 루트에 있습니다
 docker compose up        # 주최측도 동일 명령으로 채점
+```
+
+```{note}
+`cd participant_sdk/demo` 는 주최측 모노레포 안에서의 경로입니다. 참가자가 받는 공개
+스타터킷에서는 demo 가 키트 루트의 `demo/` 에 위치합니다.
 ```
 
 에이전트가 등록 → Stage 1 미션 수신 → grounding 제출 → (Stage 2) 로봇 주행하는 것을 확인할 수

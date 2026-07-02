@@ -78,9 +78,12 @@ this guide. Only the methodology is described.
 
 ## Local scoring
 
-Use the practice scoring tool in the starter kit to estimate your own score against the
-**public practice scenario** before submitting. Local scores are indicative only — the
-official run uses an unreleased competition scenario and background.
+Run the practice runtime (`marc.sh platform`) together with your agent (`demo/`) — the
+runtime auto-scores each round and streams a per-round result on `msg 401` (see
+`Scoring methodology` above). Your agent receives these scores directly (`[Score] round
+N: total=XX`), and the final Stage 1 average + Stage 2 total is published on stage
+completion. Local scores are indicative only — the official run uses an unreleased
+competition scenario and background.
 
 ---
 

@@ -121,7 +121,7 @@ base provides the redundancy for whole-body reach. See the
 
 | Property | Value |
 |---|---|
-| Resolution | **3840 x 2160 (8MP, 16:9)** |
+| Resolution | **1280 x 720 (HD, 16:9)** |
 | `frame_id` | `{camera_id}` |
 
 Discover available ids by listing topics under `/marc/env/cctv/`.

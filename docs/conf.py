@@ -50,6 +50,12 @@ intersphinx_mapping = {
     'ros2': ('https://docs.ros.org/en/humble/', None),
 }
 
+# Local offline preview (scripts/serve_preview.sh sets MARC_DOCS_OFFLINE=1) skips remote
+# inventory fetches, which fail behind captive/bot-check proxies. RTD leaves the var unset
+# and resolves the mappings normally.
+if os.environ.get('MARC_DOCS_OFFLINE', '') == '1':
+    intersphinx_mapping = {}
+
 myst_enable_extensions = [
     'colon_fence',
     'deflist',
