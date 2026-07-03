@@ -1,0 +1,23 @@
+/* MARC 2026 dev guide — table overflow fix.
+ * sphinx_rtd_theme 는 표 셀을 nowrap 으로 두어 내용이 길면 가로 스크롤이 생긴다.
+ * 셀 내용을 줄바꿈시키고 표를 본문 폭에 맞춰 가로 스크롤 없이 보이게 한다. */
+
+/* 표를 감싸는 responsive 래퍼의 가로 스크롤 제거 */
+.wy-table-responsive {
+    overflow: visible;
+}
+
+/* 셀 내용 줄바꿈 허용(기본 nowrap 해제) + 긴 토큰은 줄바꿈 */
+.wy-table-responsive table td,
+.wy-table-responsive table th,
+.rst-content table.docutils td,
+.rst-content table.docutils th {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+/* 표를 본문 폭에 맞춤 */
+.rst-content table.docutils {
+    width: 100%;
+}

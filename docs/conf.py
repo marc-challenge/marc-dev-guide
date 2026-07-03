@@ -40,6 +40,7 @@ templates_path = ['_templates']
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+html_css_files = ['custom.css']  # 표 셀 줄바꿈(가로 스크롤 제거)
 
 # RTD slug: marc-challenge (set on the Read the Docs project, not here).
 

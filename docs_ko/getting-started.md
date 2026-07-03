@@ -1,170 +1,284 @@
 # 시작하기
 
-깨끗한 머신에서 동작하는 데모 에이전트까지 최단 경로로 도달한 뒤, 계속 개발하는 데 필요한 전체
-환경을 정리합니다.
-
-> 이 페이지의 모든 버전 문자열(이미지 태그·wheel 버전·일정)은 **잠정 / 내부 검토** 단계입니다.
-> 릴리스 동결 전까지 `2026.1.0`, `v2026.x` 는 예시로 간주하십시오.
+이 페이지는 두 부분으로 이뤄져 있습니다. 먼저 아무것도 설치되지 않은 깨끗한 머신에서 시작해
+데모가 실제로 움직이는 것을 보는 데까지 가장 빠르게 도달하는 경로(Quickstart)를 안내하고, 이어서
+그 뒤로 계속 개발할 때 참고할 환경 셋업 레퍼런스를 정리합니다. 처음이라면 Quickstart 를 위에서부터
+순서대로 따라오시면 됩니다.
 
 ---
 
 ## Quickstart (목표: 30분)
 
-최단 경로: **받아서 → 켜고 → 데모 실행**.
+가장 빠른 길은 "받아서 → 켜고 → 데모 실행" 세 마디로 요약됩니다. 실제로는 아래 순서를 차례로
+밟게 됩니다.
+
+0. 사전 준비 확인 — 내 컴퓨터가 필요한 조건을 갖췄는지 점검합니다.
+1. 스타터킷 받기 — 개발의 출발점이 되는 파일 묶음을 내려받습니다.
+2. NVIDIA NGC 로그인 — Isaac Sim 이 담긴 Docker 이미지(base 이미지)를 내려받으려면 먼저 NVIDIA
+   계정 인증이 필요합니다.
+3. 시뮬레이션 플랫폼(연습용) 설치 — 그 base 이미지 위에 대회 시뮬레이션 환경을 얹은 Docker
+   이미지를 내 컴퓨터에서 직접 빌드합니다.
+4. 플랫폼 실행 — 설치한 시뮬레이션 플랫폼을 실행합니다.
+5. SDK 참조 — (필요할 때만) SDK 를 설치해야 하는지 확인하는 참고 항목입니다.
+6. 데모 실행 — 베이스라인 코드를 실행해 로봇이 움직이는지 확인합니다.
 
 ### 0. 사전 준비 확인
 
-아래 [환경 셋업](#환경-셋업) 충족 여부를 확인하십시오(Ubuntu 22.04, NVIDIA RTX GPU,
-Docker + NVIDIA Container Runtime, ROS 2 Humble).
+먼저 내 컴퓨터가 아래 [환경 셋업](#환경-셋업)의 조건을 갖췄는지 확인하세요.
 
 ### 1. 스타터킷 받기
+
+스타터킷은 여러분 개발의 출발점입니다. 여기에는 SDK, 베이스라인 코드(데모), Docker 레시피, 공개
+시나리오, 그리고 연습용 배경 USD 가 들어 있어, 이 위에 여러분의 '지능'만 얹으면 됩니다.
 
 ```bash
 git clone https://github.com/marc-challenge/marc-starter-kit.git
 cd marc-starter-kit
 ```
 
-스타터킷은 SDK, 데모 에이전트, Docker 레시피, 공개 시나리오, **chungmu** 연습 배경 USD 를 포함합니다.
-
 ### 2. NVIDIA NGC 로그인 (`nvcr.io`)
 
-플랫폼·Trainer 이미지는 **Dockerfile-only** 라 프리빌트를 받지 않고, Isaac Sim base 이미지
-(`nvcr.io/nvidia/isaac-sim:5.1.0`)를 **본인 명의로** 직접 pull 하여 로컬 빌드합니다 — 직접 pull
-한다는 것은 곧 **Isaac Sim EULA 에 본인이 라이선시로 동의**한다는 의미입니다. pull 하려면 NGC
-로그인이 선행되어야 합니다.
+주최 측이 제공하는 플랫폼은 NVIDIA 의 Isaac Sim 을 기반으로 만든 시뮬레이션 환경입니다. 참가자가
+자신의 컴퓨터에서 손쉽게 실행할 수 있도록 Docker 형태로 제공합니다.
 
-1. [ngc.nvidia.com](https://ngc.nvidia.com) 에서 **무료 계정 생성** 후 로그인.
-2. **API Key 발급** — 우측 상단 프로필 → **Setup → Generate API Key**(또는 *Generate Personal
-   Key*). 키는 **1회만 노출**되므로 즉시 복사·보관하십시오.
-3. **레지스트리 로그인.** Username 은 리터럴 문자열 `$oauthtoken`, Password 는 발급한 API Key.
+그런데 한 가지 준비가 필요합니다. 이 플랫폼의 바탕이 되는 Isaac Sim 의 Docker 이미지는 **주최 측이
+대신 나눠 줄 권한이 없습니다.** 그래서 참가자가 직접 NVIDIA 계정을 만들어, NVIDIA 가 이미지를
+배포하는 NGC 라는 서비스에 접근할 수 있는 상태를 먼저 갖춰야 합니다.
+
+한 번 NGC 에 로그인만 해 두면, 그다음부터는 스타터킷과 이 가이드의 절차대로 플랫폼이 자동으로
+내려받아져 설치(빌드)됩니다. 아래 세 단계로 로그인 상태를 만듭니다.
+
+1. [ngc.nvidia.com](https://ngc.nvidia.com) 에서 무료 계정 생성 후 로그인.
+2. API Key 발급 — 우측 상단 프로필 → Setup → Generate API Key(또는 *Generate Personal Key*).
+   키는 **1회만 노출**되므로 즉시 복사·보관하십시오.
+3. 레지스트리 로그인 — Username 은 리터럴 문자열 `$oauthtoken`, Password 는 발급한 API Key.
 
 ```bash
 docker login nvcr.io
-# Username: $oauthtoken      ← 따옴표 없이 이 문자열 그대로
-# Password: <발급한 NGC API Key>
+# Username: $oauthtoken      <- this exact string, no quotes
+# Password: <your NGC API key>
+```
+
+```{note}
+스타터킷의 `marc.sh setup` 명령은 이 로그인을 **대신 해 주지 않습니다.** NVIDIA 계정은 참가자
+본인의 것이므로, 위 로그인은 여러분이 한 번 직접 해 두어야 합니다(한 번 해 두면 계속 유지됩니다).
 ```
 
 ```{tip}
-비대화식(CI) 로그인:
-`echo "<API_KEY>" | docker login nvcr.io -u '$oauthtoken' --password-stdin`.
-`marc.sh setup` 래퍼는 로그인 필요성을 *안내만* 하며 대신 로그인하지 않습니다(자격증명은 참가자 소유).
+비밀번호를 화면에 입력하지 않고 명령 한 줄로 로그인하고 싶다면(예: 자동화 스크립트) 아래처럼
+API Key 를 파이프로 넘길 수 있습니다.
+
+    echo "<your NGC API key>" | docker login nvcr.io -u '$oauthtoken' --password-stdin
 ```
 
-### 3. 플랫폼 / Trainer 로컬 빌드 (Dockerfile-only)
+### 3. 시뮬레이션 플랫폼(연습용) 설치
 
-시뮬레이션 플랫폼·Trainer 이미지는 **Dockerfile-only** 입니다. 프리빌트 이미지는 **재배포되지
-않습니다**(Isaac Sim 재배포 라이선스). 위 NGC 로그인을 마친 상태에서 로컬 빌드하면, 빌드가
-방금 인증한 base 이미지를 pull 합니다.
+NGC 로그인을 마쳤다면, 아래 명령으로 시뮬레이션 플랫폼(연습용)을 설치할 수 있습니다. 빌드가
+시작되면 앞서 인증한 base 이미지를 자동으로 내려받습니다.
 
 ```bash
-# 빌드 컨텍스트는 리포 루트입니다(Dockerfile 이 simulation_app/, resources/, scenarios/ 를 COPY).
+# Build context is the repo root (the Dockerfile COPYs simulation_app/, resources/, scenarios/).
 docker build -f simulation-platform/Dockerfile.practice -t marc-platform:practice .
 ```
 
-```{note}
-최초 빌드는 Isaac Sim base 이미지를 pull 합니다(그래서 위 NGC 로그인이 필요). 이 단계는 인터넷이
-필요하며 정상입니다 — **빌드 시점은 온라인**입니다. 인터넷 차단은 *심사 런타임*에만 적용됩니다.
+```{important}
+**설치(빌드)는 오래 걸립니다 — 멈춘 게 아닙니다.** 컴퓨터 사양과 네트워크 속도에 따라 짧게는
+수십 분, 길게는 몇 시간까지 걸릴 수 있습니다. 특히 처음 한 번은 용량이 큰 데이터를 내려받고
+준비하는 과정이라 더 오래 걸립니다. 도중에 진행이 없어 보여도 정상이니, 완료될 때까지 그대로
+기다려 주세요.
 ```
 
+시뮬레이션 플랫폼에는 대회에 필요한 것들이 함께 들어 있습니다.
+
+- 디지털 트윈 — 실제 세종대학교 캠퍼스를 그대로 옮긴 가상 환경입니다.
+- 로봇 — 바구니를 실은 4륜 이동 로봇과 6축 로봇팔.
+- 센서 — 고정 CCTV 와 로봇에 달린 스테레오 카메라.
+- ROS 2 인터페이스 — 로봇·센서와 표준 방식으로 명령·데이터를 주고받습니다.
+- 공개 연습 시나리오 — 실제 문제와 같은 형식으로 미리 연습해 볼 수 있는 예제입니다.
+
+또한 같은 설치로 데이터셋 생성기와 매니퓰레이션 훈련 도구(Trainer)도 함께 준비됩니다.
+
 ```{note}
-빌드 시 시뮬레이션 콘텐츠는 기본적으로 GHCR 에서 받습니다. **GHCR 접근이 어려운 경우**(네트워크
-환경 등)에는 키트에 포함된 로컬 콘텐츠로 빌드하는 **폴백 경로**를 사용하세요 — 결과물은 동일합니다.
-(폴백 플래그·절차는 스타터킷 README 참조.)
+빌드 과정에서는 시뮬레이션에 필요한 데이터를 인터넷에서 자동으로 내려받습니다. 만약 네트워크
+환경 때문에 이 다운로드가 어렵거나 오프라인에서 빌드해야 한다면, 별도로 제공되는 콘텐츠 패키지를
+미리 받아 압축을 푼 뒤 그 데이터로 빌드하는 방법이 있습니다(결과물은 같습니다). 콘텐츠 패키지를
+받는 방법과 빌드 절차는 스타터킷 README 를 참고하세요.
 ```
 
-### 4. 런타임 기동
+### 4. 플랫폼 실행
 
-compose 파일은 서비스를 profile (`platform`, `dataset-gen`, `manip-trainer`) 로 묶어두었으므로
-원하는 profile 을 지정해야 합니다. 연습용 런타임은 `platform` 입니다.
+이제 설치한 플랫폼을 실행합니다. 이 안내에서는 다음 단계에서 실행할 데모와 함께 동작하는
+`marc2026_demo` 시나리오로 띄웁니다. 플랫폼 폴더로 이동한 뒤, 실행할 시나리오를 `.env` 에 적어 둡니다.
 
 ```bash
-# 정본 (compose + profile 지정)
-docker compose -f simulation-platform/docker-compose.yml --profile platform up
+cd simulation-platform
+cp .env.example .env
+```
 
-# 또는 편의 래퍼
-bash simulation-platform/marc.sh platform
+```bash
+# In simulation-platform/.env
+ENV_MARC_SCENARIO=marc2026_demo
+```
+
+스타터킷에는 연습용 플랫폼 외에도 데이터셋 생성기, 매니퓰레이션 훈련 도구가 함께 들어 있어서, 이 중
+무엇을 실행할지 골라서 지정해야 합니다. 연습용 플랫폼은 `platform` 입니다. 아래 두 명령은 같은
+일을 하니 편한 쪽을 쓰세요.
+
+```bash
+# (1) Run directly with docker compose
+docker compose --profile platform up
+
+# (2) Convenience wrapper (runs the command above)
+bash marc.sh platform
 ```
 
 ```{note}
-`docker compose up` 만으로는 어떤 서비스도 뜨지 않습니다. `simulation-platform/docker-compose.yml`
-의 모든 서비스가 profile 로 묶여 있어 `--profile platform` 을 명시해야 합니다 (또는
-`marc.sh platform` 래퍼가 자동으로 지정해줍니다).
+`docker compose up` 만 입력하면 아무것도 실행되지 않습니다. 위처럼 실행할 대상(`platform`)을
+반드시 지정해야 합니다(`marc.sh platform` 을 쓰면 이 지정을 자동으로 해 줍니다).
 ```
 
 ```{important}
-**최초 기동은 오래 걸립니다 — 멈춘 게 아닙니다.** 월드 구성(씬·사람 포즈·랜드마크·로봇)과
-셰이더 컴파일에 **수 분**(보통 2~5분, 캐시가 비어 있는 첫 실행은 더 오래)이 걸립니다. 이 동안
-**뷰포트는 검정 화면**이고 제목이 *"New Stage\*"* 로, 로딩 바가 멈춘 것처럼 보일 수 있습니다.
-이는 정상이며 **그대로 기다리세요(강제 종료 금지).** 아래 로그가 보여야 기동 완료입니다:
+**처음 실행은 오래 걸립니다 — 멈춘 게 아닙니다.** 3차원 가상 캠퍼스 데이터를 불러오는 데
+수 분(보통 2~5분, 다운로드 후 첫 실행은 더 오래)이 걸립니다. 이 동안 프로그램 화면은 검게 보이고,
+운영체제가 창을 `"Not Responding"`(응답 없음) 상태로 표시하거나 경고창을 띄울 수도 있습니다.
+이는 정상이며 그대로 기다리세요(강제 종료 금지). 아래 로그가 보여야 실행이 끝난 것입니다:
 
     [Runtime] Startup complete in <N>s
     Auto-plan: waiting for a participant to register...
 
-이때 뷰포트에 chungmu 씬이 나타나고, 플랫폼이 참가자 앱의 register 를 받을 준비가 됩니다.
+이때 뷰포트에 연습용 씬이 나타나고, 플랫폼이 참가자 앱의 register 를 받을 준비가 됩니다.
 진행 상황은 `docker compose logs -f` 로 확인하세요.
 ```
 
-### 5. SDK 참조
+### 5. 데모 실행
 
 ```bash
-# 표준(Docker 제출): marc_sdk 는 *소스로* 동봉 — 본인 이미지가 COPY 후 PYTHONPATH 에 추가한다
-#   (demo/Dockerfile 참조). pip 단계 불필요.
-# 호스트/로컬 개발 전용(ROS2 Humble source 후): 스타터킷 *루트*에서 설치 —
-pip install -e .                                   # pyproject.toml 이 있는 키트 루트에서 실행(marc_sdk/ 안 아님)
-# 또는 릴리스 wheel:
-pip install marc_sdk-2026.1.0-py3-none-any.whl     # marc-starter-kit GitHub Release 첨부
-```
-
-### 6. 데모 에이전트 실행
-
-```bash
-# 키트 루트에서 demo 디렉터리로 이동. 팀 ID / 토큰을 먼저 설정합니다.
+# Set your team id / token first, then go to the demo directory.
 export MARC_TEAM_ID=u1
-export MARC_TOKEN=<발급-토큰>
-cd demo                  # demo/ 는 스타터킷 루트에 있습니다
-docker compose up        # 주최측도 동일 명령으로 채점
+export MARC_TOKEN=<your-token>
+cd demo                  # demo/ is at the starter-kit root
+docker compose up        # organizers score with the same command
 ```
+
+데모를 실행하면 에이전트가 동작하는 전체 흐름을 눈으로 확인할 수 있습니다.
+
+1. 에이전트가 플랫폼에 접속(등록)합니다.
+2. Stage 1 문제를 받아, 대상을 어디에서 찾았는지 위치를 답안으로 제출합니다.
+3. Stage 2 에서는 로봇이 목표 지점으로 이동합니다.
+
+로봇이 움직이기 시작하면, 여러분의 에이전트와 플랫폼이 제대로 연결되어 처음부터 끝까지 정상
+동작한다는 뜻입니다.
 
 ```{note}
-`cd participant_sdk/demo` 는 주최측 모노레포 안에서의 경로입니다. 참가자가 받는 공개
-스타터킷에서는 demo 가 키트 루트의 `demo/` 에 위치합니다.
-```
+**데모(베이스라인 코드)는 문제를 실제로 "푸는" 프로그램이 아닙니다.** 흐름을 보여 주기 위해, Stage 1
+답안은 미리 저장해 둔 값을 제출하고, Stage 2 에서는 미리 정해 둔 위치로 로봇을 이동시켜 정해진
+동작으로 물건을 집습니다. CCTV 영상을 실제로 분석하거나 스스로 판단하지는 않습니다.
 
-에이전트가 등록 → Stage 1 미션 수신 → grounding 제출 → (Stage 2) 로봇 주행하는 것을 확인할 수
-있습니다. 로봇이 움직이면 루프가 닫힌 것입니다.
-
-```{tip}
-이 페이지의 모든 명령은 복사 버튼을 제공합니다(`sphinx-copybutton`). 실제 태그가 동결되면
-pull/build/install 명령을 공개 이미지 태그·wheel 버전과 **글자단위로 일치** 검증한 뒤 게시합니다.
+대신 데모는 여러분이 코드를 얹기 시작하는 베이스라인 코드입니다. 플랫폼과의 통신·로봇 제어
+연결은 이미 되어 있으니, 미리 저장된 답안·위치를 만들어 내던 자리(자리표시 부분)를 여러분의
+실제 인식·판단 코드로 바꿔 끼우면 됩니다.
 ```
 
 ---
 
 ## 환경 셋업
 
-| 항목 | 요구사항 |
+아래 항목은 반드시 맞춰야 하는 소프트웨어 요구사항과, 참고용인 개발·검증 기준 하드웨어로
+나뉩니다. 표마다 "구분"을 함께 표기했으니 어디까지가 필수이고 어디까지가 참고인지 확인하세요.
+
+### 소프트웨어 요구사항 (정확히 맞춰야 함)
+
+| 항목 | 구분 | 요구사항 |
+|---|---|---|
+| OS | 필수 | Ubuntu 22.04 LTS |
+| NVIDIA 드라이버 | 필수 | Isaac Sim 5.1.0 과 호환되는 최신 NVIDIA 드라이버(기준 환경은 580.x). |
+| Docker | 필수 | Docker Engine + NVIDIA Container Runtime(GPU 사용). |
+| Docker Compose | 필수 | v2(`docker compose`). |
+| ROS 2 | 필수 | Humble |
+| Python | 필수 | 3.10 (ROS 2 Humble 기준) |
+| NGC 계정 | 필수 | NVIDIA NGC 계정(무료) + API Key ([Quickstart 2단계](#2-nvidia-ngc-로그인-nvcr-io) 참조). |
+
+### 개발·검증 기준 하드웨어 (참고 — 최소 사양 아님)
+
+주최 측은 아래 사양에서 플랫폼을 개발·검증했습니다. 최소 사양이 아니라 기준(참고)이며, 더 낮은
+사양에서도 동작할 수 있으나 성능은 달라질 수 있습니다. 특히 GPU 는 **NVIDIA RTX 계열이 필수**이고
+VRAM 이 클수록 유리합니다.
+
+| 항목 | 기준 사양 |
 |---|---|
-| OS / HW | Ubuntu **22.04**, 충분한 VRAM 의 NVIDIA **RTX** GPU. |
-| Docker | Docker + **NVIDIA Container Runtime**(GPU 패스스루). |
-| NGC 계정 | **NVIDIA NGC 계정**(무료) + **API Key** — `nvcr.io` 에서 Isaac Sim base 이미지 pull 에 필수([Quickstart 2단계](#2-nvidia-ngc-로그인-nvcr-io) 참조). |
-| Python | 참가자 SDK = **3.10**(ROS 2 Humble). 플랫폼 내부 = 3.11(Isaac Sim, 분리 셸). |
-| 미들웨어 | ROS 2 **Humble**, **Fast DDS**. 머신 간 `ROS_DOMAIN_ID` 정렬. |
-| 토폴로지 | 참가자 앱은 플랫폼과 **별도 하드웨어**(동일 LAN / 동일 ROS 도메인, DDS 는 네트워크 경유). |
+| OS | Ubuntu 22.04.5 LTS |
+| CPU | Intel Core i7-12700K (12코어 / 20스레드) |
+| RAM | 128 GB |
+| GPU | NVIDIA RTX PRO 5000 Blackwell (48 GB VRAM) |
+| GPU 드라이버 | 580.159.03 (CUDA 13.0 지원) |
 
-### 별도 하드웨어 토폴로지
+### Docker · Docker Compose
 
-참가자 애플리케이션은 시뮬레이션 플랫폼과 **다른 머신**에서 실행하는 것을 전제로 합니다. 두 머신은
-LAN 과 **동일 `ROS_DOMAIN_ID`** 를 공유하며, DDS 디스커버리/트래픽은 네트워크(UDP)로 흐릅니다.
-데모 `docker-compose.yml` 은 `network_mode: host` 로 호스트 NIC 상에서 디스커버리합니다.
+플랫폼은 Docker 로 실행하므로, 아래 세 가지가 준비돼 있어야 합니다.
 
-8MP CCTV 영상이 네트워크로 전송되므로 **기가비트 이상 LAN** 을 권장합니다.
+**1) Docker Engine.** 최신 Docker 를 설치합니다. 설치가 끝났으면 다음으로 확인합니다.
 
-### Python 셸 분리 (중요)
+```bash
+docker --version
+```
 
-시스템 ROS 2 Humble 은 **Python 3.10**, Isaac Sim 은 **Python 3.11** 입니다. 혼용하면 import 가
-깨집니다. 플랫폼 실행 스크립트는 `/opt/ros` 경로를 `PYTHONPATH`·`LD_LIBRARY_PATH` 에서 제거하여
-Isaac Sim 셸을 깨끗하게 유지합니다. import 오류가 발생하면 [FAQ → 트러블슈팅](faq.md#트러블슈팅)을
-참조하십시오.
+아래처럼 버전이 한 줄 출력되면 정상입니다(숫자는 환경마다 다릅니다).
+
+```text
+Docker version 27.3.1, build ...
+```
+
+**2) NVIDIA Container Runtime (GPU 사용).** 시뮬레이션은 GPU 를 사용하므로, 컨테이너가 GPU 에
+접근할 수 있어야 합니다. 아래 명령으로 컨테이너 안에서 GPU 가 보이는지 확인합니다.
+
+```bash
+docker run --rm --gpus all nvidia/cuda:12.4.1-base-ubuntu22.04 nvidia-smi
+```
+
+컨테이너 안에서 아래처럼 그래픽카드 정보 표가 출력되면 정상입니다(내 GPU 이름과 드라이버·
+CUDA 버전이 보입니다).
+
+```text
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.159.03             Driver Version: 580.159.03     CUDA Version: 13.0     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+|=========================================+========================+======================|
+|   0  NVIDIA RTX PRO 5000 Blac...    Off |   00000000:01:00.0  On |                  Off |
++-----------------------------------------+------------------------+----------------------+
+```
+
+`Failed to initialize NVML` 이나 `could not select device driver ... gpu` 같은 오류가 나오면
+드라이버 또는 NVIDIA Container Runtime 설정을 다시 확인하십시오.
+
+**3) Docker Compose v2.** 이 가이드의 모든 실행 명령은 최신 표준인 Docker Compose v2, 즉
+띄어쓰기가 있는 `docker compose` 명령을 기준으로 합니다. 최신 Docker 를 설치하면 v2 가 함께
+설치됩니다. 다음 명령으로 설치 여부를 확인하세요.
+
+```bash
+docker compose version
+```
+
+아래처럼 버전이 출력되면 정상입니다(`v2` 로 시작하면 v2 입니다).
+
+```text
+Docker Compose version v2.29.7
+```
+
+```{note}
+`docker compose` 명령이 동작하지 않는다면 Docker 버전이 오래된 것입니다. Docker 를 최신 버전으로
+업그레이드하면 v2(`docker compose`)가 함께 설치됩니다.
+```
+
+### 시뮬레이션 플랫폼과 참가자 플랫폼 연동 구조
+
+예선 및 본선 심사(채점) 환경에서는 시뮬레이션 플랫폼과 여러분의 참가자 프로그램을 네트워크로
+연결된 서로 다른 컴퓨터에서 실행해 채점합니다. 다만 **개발 단계에서는 한 대의 컴퓨터에서 둘을
+함께 실행해도 괜찮습니다.**
+
+채점 환경과 똑같은 조건에서 미리 검증하고 싶다면, 두 컴퓨터를 기가비트(1 Gbps) 이상 LAN 으로
+연결하시길 권장합니다. 고정 CCTV 의 고해상도(8MP) 영상이 네트워크로 오가기 때문에 대역폭이
+넉넉해야 안정적으로 동작합니다.
 
 ### 환경변수
 
@@ -173,7 +287,3 @@ Isaac Sim 셸을 깨끗하게 유지합니다. import 오류가 발생하면 [FA
 | `MARC_TEAM_ID` | `u1` | 할당받은 팀 ID. |
 | `MARC_TOKEN` | — | 세션 토큰(필수). |
 | `ROS_DOMAIN_ID` | `0` | ROS 2 도메인; 플랫폼과 일치해야 함. |
-
-```{note}
-에이전트는 `MARC_TOKEN`·`ROS_DOMAIN_ID` 등 **`MARC_*`** 환경변수로 설정합니다.
-```
