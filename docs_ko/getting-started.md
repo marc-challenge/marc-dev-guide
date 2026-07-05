@@ -150,6 +150,13 @@ bash marc.sh platform
 진행 상황은 `docker compose logs -f` 로 확인합니다.
 ```
 
+```{figure} _static/not-responding.png
+:alt: Isaac Sim 응답 없음 경고 대화상자
+:width: 70%
+
+최초 실행 중 나타날 수 있는 운영체제의 "응답 없음" 경고. 정상 동작이므로 강제 종료하지 말고 **Wait** 를 눌러 기다립니다.
+```
+
 ### 5. 데모 실행
 
 ```bash
