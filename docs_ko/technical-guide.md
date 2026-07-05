@@ -371,7 +371,7 @@ bash marc.sh dataset-gen
   방식입니다. `trainer_output/<시나리오>/scene_<번호>/<카메라>.json` (+ 같은 이름의 `.png`) 로
   저장되며, 실행을 반복하면 기존 장면을 덮어쓰지 않고 누적합니다.
 
-정답 JSON 은 이런 형태입니다(해상도 1280x720 기준).
+정답 JSON 은 groundtruth 토픽과 오프라인 파일에 공통으로 쓰이며, 형태는 다음과 같습니다.
 
 ```json
 {
