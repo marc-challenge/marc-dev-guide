@@ -36,9 +36,8 @@
   - `marc2026_chungmu` — 실제 대회와 같은 형식의 전체 문항이 담긴 종합 연습 시나리오입니다. 정답이
     함께 들어 있어, 여러분이 제출한 답안이 몇 점을 받는지 자기 채점 결과까지 확인할 수 있습니다.
   - `marc2026_demo` — 베이스라인 코드가 등록부터 답안 제출·주행까지 처음부터 끝까지 문제없이 도는지
-    빠르게 확인하기 위한 데모 시나리오입니다. 베이스라인 코드가 사용하는 예시 데이터
-    (`demo/mockup_demo_data.yaml`)가 이 시나리오에서 뽑은 것이라, 둘을 함께 쓰면 전체 흐름이
-    자연스럽게 이어집니다.
+    빠르게 확인하기 위한 데모 시나리오입니다. 짧은 시간에 전체 동작을 시연할 수 있도록
+    `marc2026_chungmu` 를 변형한 시나리오입니다.
 - 어떤 시나리오로 띄울지, 그 시나리오의 어떤 문항을 낼지 고르는 선택 기능.
 
 실제 채점에 쓰이는 시나리오는 공개하지 않으므로, 위 두 시나리오로 형식과 흐름을 익힌 뒤 실제 인식·판단
@@ -46,55 +45,56 @@
 
 ### 사용 방법
 
-스타터킷의 `simulation-platform/` 폴더에서 실행합니다.
+스타터킷의 `simulation-platform/` 폴더에서 실행합니다. 참가자는 보통 **① 경연 환경 설정(시나리오·문항
+선택) → ② 플랫폼 실행** 순서로 진행하며, 개발 중에는 설정을 바꿔 가며 이 과정을 반복합니다.
+
+#### ① 경연 환경 설정 (시나리오·문항 선택)
+
+무엇을 — 어떤 시나리오의 어떤 문항을 — 낼지 먼저 정합니다. 이 설정은 플랫폼 폴더의 `.env` 에 저장되어
+다음 실행부터 적용됩니다.
+
+**시나리오 선택.** 어떤 시나리오로 플랫폼을 띄울지는 `ENV_MARC_SCENARIO` 로 정합니다(기본값
+`marc2026_chungmu`). `.env` 에 적어 두면(권장) 다음 실행부터 적용되고, 한 번만 바꿔 실행하려면 실행
+명령 앞에 잠깐 붙여도 됩니다.
+
+```bash
+# simulation-platform/.env
+ENV_MARC_SCENARIO=marc2026_demo
+```
+
+**문항 선택 (`problems.yaml`).** 시나리오에는 여러 문항이 들어 있는데, 개발 중에는 그중 특정 문항만
+골라 반복해서 시험해 보고 싶을 때가 많습니다. **`problems.yaml` 파일이 있으면** 플랫폼이 그 파일에서
+켜 둔(enabled) 문항만 출제하고, **파일이 없으면 전체 문항**을 출제합니다. 별도 환경변수 설정은 필요
+없습니다.
+
+낼 문항은 아래 명령의 체크리스트로 고릅니다(위아래로 이동, 스페이스바로 켜고 끄기). 저장하면 킷 루트에
+활성 파일 `problems.yaml` 과 시나리오별 보관본 `problems.<scenario>.yaml` 이 함께 만들어지고, 다음
+실행부터 자동 적용됩니다. 전체 문항으로 되돌리려면 `problems.yaml` 을 지우면 됩니다.
+
+```bash
+bash simulation-platform/marc.sh select marc2026_chungmu   # or marc2026_demo
+```
+
+```{note}
+**문항 선택은 시나리오별로 따로 보관됩니다.** select 를 실행하면 그 시나리오의 보관본
+`problems.<scenario>.yaml` 과 플랫폼이 읽는 활성 파일 `problems.yaml` 이 함께 저장되고, 같은
+시나리오로 다시 select 하면 이전 선택을 불러와 이어서 편집합니다. 플랫폼은 실행 시 `problems.yaml` 의
+`scenario` 가 현재 시나리오와 다르면 그 파일을 무시하고 경고를 남긴 뒤 **전체 문항으로 폴백**하므로,
+**시나리오를 바꿨다면 그 시나리오로 select 를 다시 실행**하세요. 시나리오에 없는 문항 이름은 무시되고
+경고만 남습니다.
+```
+
+#### ② 플랫폼 실행
+
+환경 설정이 끝나면 플랫폼을 띄웁니다. 시나리오(`.env`)와 문항(`problems.yaml`) 선택이 그대로 적용됩니다.
 
 ```bash
 cd simulation-platform
 docker compose --profile platform up   # or: bash marc.sh platform
 ```
 
-#### 시나리오 선택
-
-어떤 시나리오로 플랫폼을 띄울지는 `ENV_MARC_SCENARIO` 값으로 정합니다. 기본값은 `marc2026_chungmu`
-이며, 데모 시나리오로 바꾸려면 플랫폼 폴더의 `.env` 파일에서 이 값을 고치거나(권장), 실행 명령 앞에
-잠깐 붙여 주면 됩니다.
-
-```bash
-# Option 1: edit simulation-platform/.env
-ENV_MARC_SCENARIO=marc2026_demo
-
-# Option 2: set it just for this run
-ENV_MARC_SCENARIO=marc2026_demo docker compose --profile platform up
-```
-
-#### 문항 선택 (`problems.yaml`)
-
-시나리오에는 여러 문항이 들어 있는데, 개발 중에는 그중 특정 문항만 골라 반복해서 시험해 보고 싶을
-때가 많습니다. 이때는 낼 문항을 적어 둔 `problems.yaml` 파일을 만들어 두면, 플랫폼이 그 파일에서
-켜 둔(enabled) 문항만 출제합니다.
-
-1. 낼 문항을 고릅니다. 아래 명령을 실행하면 터미널에 문항 목록이 체크리스트로 뜨고, 위아래로 움직이며
-   스페이스바로 켜고 끈 뒤 저장하면 킷 루트에 `problems.yaml` 이 만들어집니다.
-
-   ```bash
-   bash simulation-platform/marc.sh select marc2026_chungmu   # or marc2026_demo
-   ```
-
-2. 그 파일을 쓰도록 켭니다. 플랫폼 폴더의 `.env` 에서 아래 줄의 주석을 해제하면, 다음 실행부터
-   `problems.yaml` 의 선택이 적용됩니다.
-
-   ```bash
-   MARC_PROBLEM_SELECTION=/metacom2026/problems.yaml
-   ```
-
-`MARC_PROBLEM_SELECTION` 을 비워 두면(기본값) 파일 대신 환경변수 `MARC_AUTO_STAGE1`
-(`all` · `first` · `"id,id"`)과 `MARC_AUTO_STAGE2`(`off` · `auto` · `"id"`)로 간단히 지정할 수도 있습니다.
-
-```{note}
-`problems.yaml` 의 문항 목록은 고른 시나리오에 맞춰 만들어집니다. 시나리오를 바꿨다면 위 select 명령으로
-그 시나리오에 맞게 `problems.yaml` 을 다시 만들어 주세요. 시나리오에 없는 문항 이름은 무시되고 경고만
-남습니다.
-```
+다른 시나리오나 다른 문항으로 시험하려면 **①로 돌아가 설정을 바꾼 뒤 다시 실행**하면 됩니다 — 개발
+중에는 이 "설정 → 실행 → 확인" 반복이 기본 흐름입니다.
 
 ---
 
@@ -201,11 +201,11 @@ docker compose up
 
 | 파일 | 구분 | 역할 |
 |---|---|---|
-| `participant_app.py` | 필수(진입점) | `MARCClient` 에 콜백을 등록하고 Stage 1 / Stage 2 전체 흐름을 연결. |
-| `mockup_agent_vla.py` | **mock — 교체 대상** | Stage 1·2 인식(VLA) 자리표시. CCTV 를 분석하지 않고, 받은 음성 명령으로 `mockup_demo_data.yaml` 에서 문항별 정답을 찾아 제출. |
-| `mockup_agent_navigation.py` | **mock — 교체·개선 대상** | Stage 2 내비게이션: 목표 추종 제어 + 점유 격자 A\* 경로 계획 + 장애물 회피. |
-| `mockup_agent_manipulation.py` | **mock — 교체·개선 대상** | 로봇팔 집기 동작(관절각 키프레임). |
-| `mockup_demo_data.yaml` | 데모 데이터 | 시나리오에서 미리 뽑은 **장애물 + Stage 1·2 문항별 정답 좌표**. `tools/mockup_data_builder/gen_mockup_demo_data.py` 가 정답에 무작위 오답을 일부 섞어 생성합니다. 실제 참가자는 이 데이터가 없습니다. |
+| `participant_app.py` | 필수(진입점) | `MARCClient` 에 콜백을 등록하고 Stage 1 / Stage 2 전체 흐름을 연결 |
+| `mockup_agent_vla.py` | **mock — 교체 대상** | Stage 1·2 인식(VLA) 자리표시. CCTV 를 분석하지 않고, 받은 음성 명령으로 `mockup_demo_data.yaml` 에서 문항별 정답을 찾아 제출 |
+| `mockup_agent_navigation.py` | **mock — 교체·개선 대상** | Stage 2 내비게이션: 목표 추종 제어 + 점유 격자 A\* 경로 계획 + 장애물 회피 |
+| `mockup_agent_manipulation.py` | **mock — 교체·개선 대상** | 로봇팔 집기 동작(관절각 키프레임) |
+| `mockup_demo_data.yaml` | 데모 데이터 | 시나리오에서 미리 뽑은 **장애물 + Stage 1·2 문항별 정답 좌표**. `tools/mockup_data_builder/gen_mockup_demo_data.py` 가 정답에 무작위 오답을 일부 섞어 생성합니다. 실제 참가자는 이 데이터가 없습니다 |
 
 세 개의 `mockup_agent_*` 파일이 여러분이 개발할 에이전트 코드(인식·내비게이션·조작)를 **대신하는
 자리표시**입니다. `participant_app.py` 는 이들을 불러 전체 흐름만 엮습니다.

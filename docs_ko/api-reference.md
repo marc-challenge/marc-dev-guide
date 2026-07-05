@@ -330,10 +330,10 @@ ACK 이후 모든 `request` 메시지는 발급받은 `session_key` 를 `header.
 
 | 필드 | 타입 | 필수 | 설명 |
 |---|---|---|---|
-| `msg` | int | 전체 | 메시지 유형 id. |
-| `timestamp` | float | 전체 | 발행 시각(Unix epoch, 초). |
-| `seq` | int | request, response | request/response 페어링 키; 세션 내 단조 증가(재전송 방어). |
-| `session` | string | request만 | 발급받은 `session_key`(정적 토큰 아님). |
+| `msg` | int | 전체 | 메시지 유형 id |
+| `timestamp` | float | 전체 | 발행 시각(Unix epoch, 초) |
+| `seq` | int | request, response | request/response 페어링 키; 세션 내 단조 증가(재전송 방어) |
+| `session` | string | request만 | 발급받은 `session_key`(정적 토큰 아님) |
 
 ### 제어 토픽
 
@@ -453,9 +453,9 @@ world 좌표로 역투영할 때 해당 지면 높이를 고려하십시오.
 
 | 필드 | 의미 |
 |---|---|
-| `interpretation.target_type` | 단일 객체 유형. 사람 문제는 `"person"`. |
-| `interpretation.landmark` | 기준 랜드마크 이름(관계 동반 시). |
-| `interpretation.relation` | 공간 관계(`near`, `beside`, `behind`, `front`, `left`, `right`, `on`, `above`) — 분실물 관계 문제. |
-| `interpretation.situation` | 상황 카테고리(`accident`, `emergency`, `abnormal`, `normal`) — SAR 사람 문제. |
-| `grounding.anchor_coord` | 기준 랜드마크 추정 좌표 `[x, y, z]` (m). |
-| `grounding.target_coord` | 대상 추정 좌표 `[x, y, z]` (m). |
+| `interpretation.target_type` | 단일 객체 유형. 사람 문제는 `"person"` |
+| `interpretation.landmark` | 기준 랜드마크 이름(관계 동반 시) |
+| `interpretation.relation` | 공간 관계(`near`, `beside`, `behind`, `front`, `left`, `right`, `on`, `above`) — 분실물 관계 문제 |
+| `interpretation.situation` | 상황 카테고리(`accident`, `emergency`, `abnormal`, `normal`) — SAR 사람 문제 |
+| `grounding.anchor_coord` | 기준 랜드마크 추정 좌표 `[x, y, z]` (m) |
+| `grounding.target_coord` | 대상 추정 좌표 `[x, y, z]` (m) |

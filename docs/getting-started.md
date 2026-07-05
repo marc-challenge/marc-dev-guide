@@ -150,12 +150,12 @@ published image tags and wheel version before release.
 
 | Item | Requirement |
 |---|---|
-| OS / HW | Ubuntu **22.04**, NVIDIA **RTX** GPU with sufficient VRAM. |
-| Docker | Docker + **NVIDIA Container Runtime** (GPU pass-through). |
-| NGC account | **NVIDIA NGC account** (free) + **API key** — required to pull the Isaac Sim base image from `nvcr.io` (see [Quickstart step 2](#2-log-in-to-nvidia-ngc-nvcr-io)). |
-| Python | Participant SDK = **3.10** (ROS 2 Humble). Platform-internal = 3.11 (Isaac Sim, separate shell). |
-| Middleware | ROS 2 **Humble**, **Fast DDS**. Align `ROS_DOMAIN_ID` across machines. |
-| Topology | Your agent runs on **separate hardware** from the platform (same LAN / same ROS domain, DDS over the network). |
+| OS / HW | Ubuntu **22.04**, NVIDIA **RTX** GPU with sufficient VRAM |
+| Docker | Docker + **NVIDIA Container Runtime** (GPU pass-through) |
+| NGC account | **NVIDIA NGC account** (free) + **API key** — required to pull the Isaac Sim base image from `nvcr.io` (see [Quickstart step 2](#2-log-in-to-nvidia-ngc-nvcr-io)) |
+| Python | Participant SDK = **3.10** (ROS 2 Humble). Platform-internal = 3.11 (Isaac Sim, separate shell) |
+| Middleware | ROS 2 **Humble**, **Fast DDS**. Align `ROS_DOMAIN_ID` across machines |
+| Topology | Your agent runs on **separate hardware** from the platform (same LAN / same ROS domain, DDS over the network) |
 
 ### Separate-hardware topology
 
@@ -178,9 +178,9 @@ Mixing them breaks imports. The platform launch scripts remove `/opt/ros` paths 
 
 | Variable | Default | Description |
 |---|---|---|
-| `MARC_TEAM_ID` | `u1` | Your assigned team id. |
-| `MARC_TOKEN` | — | Session token (required). |
-| `ROS_DOMAIN_ID` | `0` | ROS 2 domain; must match the platform. |
+| `MARC_TEAM_ID` | `u1` | Your assigned team id |
+| `MARC_TOKEN` | — | Session token (required) |
+| `ROS_DOMAIN_ID` | `0` | ROS 2 domain; must match the platform |
 
 ```{note}
 The agent is configured via **`MARC_*`** environment variables such as `MARC_TOKEN` and `ROS_DOMAIN_ID`.

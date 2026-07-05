@@ -66,10 +66,10 @@ Every operations message is `{ "header": {...}, "payload": {...} }`.
 
 | Field | Type | Required on | Description |
 |---|---|---|---|
-| `msg` | int | all | Message type id. |
-| `timestamp` | float | all | Publish time (Unix epoch, seconds). |
-| `seq` | int | request, response | Request/response pairing key; **monotonically increasing** per session (replay defense). |
-| `session` | string | request only | Issued `session_key` (not the static token). |
+| `msg` | int | all | Message type id |
+| `timestamp` | float | all | Publish time (Unix epoch, seconds) |
+| `seq` | int | request, response | Request/response pairing key; **monotonically increasing** per session (replay defense) |
+| `session` | string | request only | Issued `session_key` (not the static token) |
 
 ---
 
@@ -238,9 +238,9 @@ Single-target model. `target_type` is a single string; coordinates are single 3D
 
 | Field | Meaning |
 |---|---|
-| `interpretation.target_type` | Single object type. Person problems use `"person"`. |
-| `interpretation.landmark` | Reference landmark name (when a relation is involved). |
-| `interpretation.relation` | Spatial relation (`near`, `beside`, `behind`, `front`, `left`, `right`, `on`, `above`) — for lost-and-found relation problems. |
-| `interpretation.situation` | Situation category (`accident`, `emergency`, `abnormal`, `normal`) — for SAR person problems. |
-| `grounding.anchor_coord` | Estimated landmark coordinate `[x, y, z]` (m). |
-| `grounding.target_coord` | Estimated target coordinate `[x, y, z]` (m). |
+| `interpretation.target_type` | Single object type. Person problems use `"person"` |
+| `interpretation.landmark` | Reference landmark name (when a relation is involved) |
+| `interpretation.relation` | Spatial relation (`near`, `beside`, `behind`, `front`, `left`, `right`, `on`, `above`) — for lost-and-found relation problems |
+| `interpretation.situation` | Situation category (`accident`, `emergency`, `abnormal`, `normal`) — for SAR person problems |
+| `grounding.anchor_coord` | Estimated landmark coordinate `[x, y, z]` (m) |
+| `grounding.target_coord` | Estimated target coordinate `[x, y, z]` (m) |

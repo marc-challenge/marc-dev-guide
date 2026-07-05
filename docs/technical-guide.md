@@ -116,10 +116,10 @@ run, read, and replace piece by piece.
 
 | File | Role |
 |---|---|
-| `participant_app.py` | Wires the full Stage 1 / Stage 2 flow via `MARCClient` handlers. |
-| `mock_vla.py` | **Mock VLA grounding** — keyword matching; you replace this with your model. |
-| `occupancy_planner.py` | Occupancy-grid **A\*** path planner (`get_occupancy_map()` input). |
-| `nav.py` | Waypoint-follow controller producing `(linear_x, angular_z)`. |
+| `participant_app.py` | Wires the full Stage 1 / Stage 2 flow via `MARCClient` handlers |
+| `mock_vla.py` | **Mock VLA grounding** — keyword matching; you replace this with your model |
+| `occupancy_planner.py` | Occupancy-grid **A\*** path planner (`get_occupancy_map()` input) |
+| `nav.py` | Waypoint-follow controller producing `(linear_x, angular_z)` |
 
 Flow:
 

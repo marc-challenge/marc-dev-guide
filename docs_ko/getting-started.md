@@ -191,12 +191,12 @@ docker compose up        # organizers score with the same command
 | 항목 | 구분 | 요구사항 |
 |---|---|---|
 | OS | 필수 | Ubuntu 22.04 LTS |
-| NVIDIA 드라이버 | 필수 | Isaac Sim 5.1.0 과 호환되는 최신 NVIDIA 드라이버(기준 환경은 580.x). |
-| Docker | 필수 | Docker Engine + NVIDIA Container Runtime(GPU 사용). |
-| Docker Compose | 필수 | v2(`docker compose`). |
+| NVIDIA 드라이버 | 필수 | Isaac Sim 5.1.0 과 호환되는 최신 NVIDIA 드라이버(기준 환경은 580.x) |
+| Docker | 필수 | Docker Engine + NVIDIA Container Runtime(GPU 사용) |
+| Docker Compose | 필수 | v2(`docker compose`) |
 | ROS 2 | 필수 | Humble |
 | Python | 필수 | 3.10 (ROS 2 Humble 기준) |
-| NGC 계정 | 필수 | NVIDIA NGC 계정(무료) + API Key ([Quickstart 2단계](#2-nvidia-ngc-로그인-nvcr-io) 참조). |
+| NGC 계정 | 필수 | NVIDIA NGC 계정(무료) + API Key ([Quickstart 2단계](#2-nvidia-ngc-로그인-nvcr-io) 참조) |
 
 ### 개발·검증 기준 하드웨어 (참고 — 최소 사양 아님)
 
@@ -284,6 +284,6 @@ Docker Compose version v2.29.7
 
 | 변수 | 기본값 | 설명 |
 |---|---|---|
-| `MARC_TEAM_ID` | `u1` | 할당받은 팀 ID. |
-| `MARC_TOKEN` | — | 세션 토큰(필수). |
-| `ROS_DOMAIN_ID` | `0` | ROS 2 도메인; 플랫폼과 일치해야 함. |
+| `MARC_TEAM_ID` | `u1` | 할당받은 팀 ID |
+| `MARC_TOKEN` | — | 세션 토큰(필수) |
+| `ROS_DOMAIN_ID` | `0` | ROS 2 도메인; 플랫폼과 일치해야 함 |
