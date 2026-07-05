@@ -44,7 +44,7 @@ Stage 2 has two parts: submit one grounding (same payload shape as msg 301) for 
 `task_description`, then navigate and pick-and-place, delivering the item to the
 **designated location**, and finally emit `task_complete` (msg 302, irreversible).
 
-The SDK wraps all of this — see [Technical Guide → Submission API](technical-guide.md#submission-api).
+The SDK wraps all of this — see [Technical Guide → MARC Client SDK](submission-api).
 
 ---
 
@@ -87,6 +87,7 @@ competition scenario and background.
 
 ---
 
+(submission-procedure)=
 ## Submission procedure
 
 Participant applications are **developed and submitted as Docker** (required). The standard

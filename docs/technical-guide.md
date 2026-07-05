@@ -119,6 +119,7 @@ basic flow.
 
 ---
 
+(submission-api)=
 ## MARC Client SDK (`marc_sdk`)
 
 At the center of this SDK is a single class, `MARCClient`. The ROS 2 communication with the

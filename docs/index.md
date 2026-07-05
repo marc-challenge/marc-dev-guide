@@ -93,7 +93,7 @@ faq
    different background.
 ```
 
-See [FAQ → Notices](faq.md#notices) for the full text.
+See [FAQ → Notices](notices) for the full text.
 
 ## Versioning
 
