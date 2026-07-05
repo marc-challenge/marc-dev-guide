@@ -176,16 +176,25 @@ client.run()       # spin in the background (blocks)
 
 ## 베이스라인 코드 (데모)
 
-스타터킷에는 등록부터 답안 제출·로봇 주행까지 전체 흐름이 이미 동작하는 베이스라인 코드(데모)가
+스타터킷에는 등록부터 답안 제출·로봇 주행까지 전체 흐름이 이미 연결된 베이스라인 코드(데모)가
 들어 있습니다. 인식·판단 부분만 모의 구현(mock)으로 채워져 있어서, 참가자는 이 코드를 출발점으로 그
-부분을 실제 구현으로 교체하면 됩니다.
+부분을 실제 구현으로 교체하면 됩니다. 세 개의 `mock_agent_*` 에이전트는 CCTV·센서로 인식하는 대신,
+데모 데이터 파일 `mock_demo_data.yaml` 에 미리 뽑아 둔 값(문항별 정답 좌표, 장애물)을 찾아 쓰는
+방식으로 동작합니다.
+
+```{admonition} mock_demo_data.yaml 은 시나리오에서 뽑은 데모 전용 데이터입니다
+:class: important
+`mock_demo_data.yaml` 의 Stage 1·2 문항별 정답 좌표와 장애물은 `tools/mock_data_builder` 가
+데모 시나리오(`scenarios/marc2026_demo.yaml`)에서 **정답을 추출하고 무작위 오답을 일부 섞어** 만든
+것입니다. 실제 채점 환경에서는 시나리오도 런타임 정답도 없으므로, 이 데이터를 사용하는 세 mock 에이전트를
+참가자의 실제 인식·감지 코드로 반드시 교체해야 합니다.
+```
 
 ### 제공 기능
 
 - 등록부터 답안 제출, 로봇 주행까지 전체 흐름이 이미 연결된 실행 가능한 예제 코드.
-- 인식·판단을 대신하는 세 개의 mock 에이전트(모의 구현) — 어디를 실제 코드로 바꾸면 되는지 명확합니다.
-- 실제로 동작하는 Stage 2 내비게이션(점유 격자 A\* 경로 계획 + 장애물 회피) — 그대로 두거나 개선해
-  쓸 수 있습니다.
+- 인식·판단을 대신하는 세 개의 mock 에이전트(인식·내비게이션·조작) — 어디를 실제 코드로 바꾸면 되는지 명확합니다.
+- Stage 2 주행: 미리 뽑아 둔 장애물 데이터로 이동 경로를 계획하는 내비게이션 모의 구현 — 교체·개선 대상.
 
 ### 사용 방법
 
@@ -204,9 +213,9 @@ docker compose up
 |---|---|---|
 | `participant_app.py` | 필수(진입점) | `MARCClient` 에 콜백을 등록하고 Stage 1 / Stage 2 전체 흐름을 연결 |
 | `mock_agent_vla.py` | **mock — 교체 대상** | Stage 1·2 인식(VLA) 모의 구현. CCTV 를 분석하지 않고, 받은 자연어 명령으로 `mock_demo_data.yaml` 에서 문항별 정답을 찾아 제출 |
-| `mock_agent_navigation.py` | **mock — 교체·개선 대상** | Stage 2 내비게이션: 목표 추종 제어 + 점유 격자 A\* 경로 계획 + 장애물 회피 |
+| `mock_agent_navigation.py` | **mock — 교체·개선 대상** | Stage 2 내비게이션 모의 구현. 미리 뽑아 둔 장애물 데이터로 이동 경로를 계획하여 주행 |
 | `mock_agent_manipulation.py` | **mock — 교체·개선 대상** | 로봇팔 집기 동작(관절각 키프레임) |
-| `mock_demo_data.yaml` | 데모 데이터 | 시나리오에서 미리 뽑은 **장애물 + Stage 1·2 문항별 정답 좌표**. `tools/mock_data_builder/gen_mock_demo_data.py` 가 정답에 무작위 오답을 일부 섞어 생성합니다. 실제 참가자는 이 데이터가 없습니다 |
+| `mock_demo_data.yaml` | 데모 데이터 | 세 mock 에이전트가 참조하는, 시나리오에서 미리 뽑은 Stage 1·2 정답 좌표 + 장애물 (데모 전용 — 개요 참조) |
 
 세 개의 `mock_agent_*` 파일이 참가자가 개발할 에이전트 코드(인식·내비게이션·조작)를 **대신하는
 모의 구현**입니다. `participant_app.py` 는 이들을 불러 전체 흐름만 연결합니다.
@@ -221,30 +230,29 @@ docker compose up
    정답을 찾아 `GroundingResult` 로 돌려주고, 이를 `submit_stage2_grounding()` 으로 제출. 함께 받은
    `owner_position`(배치 위치)을 저장.
 4. **Stage 2 리빌** — `on_stage2_reveal` 콜백에서 대략 위치 힌트(`hint_center`)를 수거 목표로 저장.
-5. **Stage 2 주행** — `on_stage2_run`(별도 스레드)에서: ① 수거 지점으로 A\* 내비게이션 → 도착하면
+5. **Stage 2 주행** — `on_stage2_run`(별도 스레드)에서: ① 수거 지점으로 내비게이션 → 도착하면
    로봇팔로 집기, ② 배치 위치(owner_zone)로 내비게이션 → 도착 후 `task_complete()`.
 
 #### 모의 구현(mock)으로 처리한 부분
 
-데모가 실제로 인식·판단하지 않고 미리 정한 값으로 채워 둔 부분은 다음과 같습니다. 이 부분이
-참가자가 실제 코드로 교체할 위치입니다(파일명 기준).
+데모가 인식·판단 대신 `mock_demo_data.yaml` 의 미리 뽑아 둔 값으로 채워 둔 세 부분이며, 참가자가 실제
+코드로 교체할 위치입니다.
 
-- `mock_agent_vla.py` — Stage 1·2 인식을 CCTV 분석 없이, `mock_demo_data.yaml` 에서 문항별
-  정답을 자연어 명령으로 찾아 제출하는 방식으로 대신합니다.
-- `mock_demo_data.yaml` — Stage 1·2 문항별 정답 좌표와 장애물을 **시나리오에서 미리 뽑아** 둔
-  데이터입니다(정답에는 무작위 오답이 일부 섞여 있어 부분 점수를 받습니다). 실제 대회 참가자는
-  시나리오가 없으므로, 이 데이터에 의존하지 말고 인식으로 대체해야 합니다.
-- `mock_agent_manipulation.py` — 물체 위치를 인식하지 않고 고정된 관절 키프레임으로 집습니다.
+- `mock_agent_vla.py` — Stage 1·2 인식(VLA). CCTV 를 분석하지 않고, 받은 자연어 명령으로 문항별
+  정답 좌표를 데모 데이터에서 찾아 제출합니다.
+- `mock_agent_navigation.py` — Stage 2 내비게이션. 센서로 장애물을 감지하는 대신, 미리 뽑아 둔
+  장애물 데이터로 이동 경로를 계획하여 주행합니다.
+- `mock_agent_manipulation.py` — 로봇팔 집기. 물체 위치를 인식하지 않고 고정된 관절 키프레임으로 집습니다.
 
-반대로 `mock_agent_navigation.py` 안의 **제어와 점유 격자 A\* 경로 계획은 실제로 동작**하므로,
-그대로 두거나 개선하여 사용할 수 있습니다(장애물 데이터만 위 yaml 에서 가져옵니다).
+세 에이전트 모두 데모 데이터에 의존하므로, 실제 대회에서는 참가자의 실제 인식·감지 코드로 교체해야 합니다.
 
-```{admonition} mock_demo_data.yaml 은 시나리오에서 뽑은 데모 전용 데이터입니다
-:class: important
-`mock_demo_data.yaml` 의 Stage 1·2 문항별 정답 좌표와 장애물은 `tools/mock_data_builder` 가
-데모 시나리오(`scenarios/marc2026_demo.yaml`)에서 **정답을 추출하고 무작위 오답을 일부 섞어** 만든
-것입니다. 실제 채점 환경에서는 시나리오도 런타임 정답도 없으므로, 이 데이터를 사용하는 부분(인식·장애물)을
-참가자의 실제 인식·감지 코드로 반드시 교체해야 합니다.
+```{important}
+**교체 대상은 "알고리즘"이며, "플랫폼 연동"이 아닙니다.** mock 인 것은 위 세 에이전트 안의 인식·판단·
+이동 경로 로직뿐입니다. 반면 `participant_app.py` 가 플랫폼과 주고받는 `marc_sdk` 호출 — 등록·핸드셰이크
+(`connect`), 콜백 등록(`on_mission`·`on_stage2_mission`·`on_stage2_run` 등), 답안 제출
+(`submit_grounding`·`submit_stage2_grounding`), 센서 조회(`get_cctv_image`·`get_occupancy_map`),
+로봇 제어(`send_cmd_vel`)·완료 통지(`task_complete`) — 은 **그대로 사용해야 하는 정확한 예시 코드**입니다.
+참가자는 이 연동 골격을 유지한 채, 각 콜백이 반환할 값을 만드는 알고리즘만 실제 구현으로 교체하면 됩니다.
 ```
 
 #### 코드 구조
@@ -278,7 +286,7 @@ class DemoParticipant:
     def _drive(self):
         # navigate to the object -> arm pick -> navigate to the delivery point
         while self.client.is_running:
-            twist = self._plan_step()                 # occupancy A* + path follow
+            twist = self._plan_step()                 # plan a path to the target and follow it
             self.client.send_cmd_vel(**twist)
         self.client.task_complete()
 
@@ -299,7 +307,7 @@ DemoParticipant().run()
    참가자의 grounding 결과로 교체합니다(`process_stage2()` 에 같은 VLA 를 재사용해도 됩니다).
 3. **시나리오 의존 제거** — 장애물을 `mock_demo_data.yaml`(시나리오 추출본) 대신 `get_occupancy_map()`
    과 라이다·카메라 센서로 감지하도록 변경합니다.
-4. **필요하면 내비게이션·집기 개선** — `mock_agent_navigation.py`(제어·A\*) / `mock_agent_manipulation.py`
+4. **필요하면 내비게이션·집기 개선** — `mock_agent_navigation.py` / `mock_agent_manipulation.py`
    는 그대로도 부분 점수를 얻을 수 있으므로, 먼저 인식(1·2)부터 교체하고 이후 개선합니다.
 5. **리빌 힌트 활용** — Stage 2 에서 grounding 이 틀려도 `on_stage2_reveal` 의 대략 위치로 수거
    주행을 이어갈 수 있습니다(데모가 이미 그렇게 동작합니다).
@@ -317,15 +325,15 @@ DemoParticipant().run()
 ## 데이터셋 생성기
 
 CCTV 영상으로 물건과 사람을 찾는 인지 모델을 학습하려면, 라벨(정답)이 붙은 학습 데이터가
-필요합니다. 데이터셋 생성기는 대회와 같은 CCTV 화각 안에 대회용 사물·랜드마크·사람을 배치하고,
-그 장면의 이미지와 정답 라벨을 자동으로 생성합니다. (모델을 대신 학습시키지는 않으며 —
-학습에 사용할 데이터를 생성합니다.)
+필요합니다. 데이터셋 생성기는 시뮬레이션 플랫폼(연습·대회 공통)과 동일한 CCTV 화각 안에 대회용
+사물·랜드마크·사람을 배치하고, 그 장면의 이미지와 정답 라벨을 자동으로 생성합니다.
+(모델을 대신 학습시키지는 않으며 — 학습에 사용할 데이터를 생성합니다.)
 
 ### 제공 기능
 
 생성하는 데이터는 두 가지입니다.
 
-- 물건 인식(object detection) — 장면 속 각 대상의 종류(`class`)와 2D 경계상자(bounding box).
+- 물체 인식(object detection) — 배치한 **사물·랜드마크·사람** 각각의 종류(`class`)와 2D 경계상자(bounding box).
 - 자세 추정(pose estimation)용 정보 — 각 CCTV 의 위치·방향(extrinsics)과 렌즈 정보(intrinsics),
   그리고 카메라 이미지.
 
