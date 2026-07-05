@@ -359,8 +359,13 @@ bash marc.sh dataset-gen
 
 생성된 데이터는 두 경로로 제공됩니다.
 
-- ROS 2 토픽 — 카메라별 이미지(`.../image`) · 카메라 정보(`.../info`) · 정답(`.../groundtruth`,
-  JSON). 정답 토픽은 latched 라, 나중에 구독해도 현재 장면의 정답을 곧바로 받습니다.
+- ROS 2 토픽 — 카메라별로 아래 토픽을 발행합니다(`{cam}` = 카메라 id, 네임스페이스 기본값 `marc`).
+  - `/marc/env/cctv/{cam}/image` (`sensor_msgs/Image`) — 카메라 이미지.
+  - `/marc/env/cctv/{cam}/info` (`sensor_msgs/CameraInfo`) — 렌즈 정보(intrinsics).
+  - `/marc/env/cctv/{cam}/groundtruth` (`std_msgs/String`, JSON) — 물체 인식 정답: 각 대상의
+    종류(`class`)와 2D 경계상자. 장면이 바뀌기 전까지 정적이라 **latched** 로 발행되어, 나중에
+    구독해도 현재 장면의 정답을 곧바로 받습니다.
+  - `/tf_static` (`tf2_msgs/TFMessage`) — 각 카메라의 위치·방향(extrinsics). 위치·방향 추정에 사용합니다.
 - 오프라인 파일 — `trainer_output/<시나리오>/scene_<번호>/<카메라>.json` (+ 같은 이름의 `.png`).
   실행을 반복하면 기존 장면을 덮어쓰지 않고 누적합니다.
 
