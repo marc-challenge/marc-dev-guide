@@ -203,7 +203,7 @@ docker compose up
 | 파일 | 구분 | 역할 |
 |---|---|---|
 | `participant_app.py` | 필수(진입점) | `MARCClient` 에 콜백을 등록하고 Stage 1 / Stage 2 전체 흐름을 연결 |
-| `mock_agent_vla.py` | **mock — 교체 대상** | Stage 1·2 인식(VLA) 모의 구현. CCTV 를 분석하지 않고, 받은 음성 명령으로 `mock_demo_data.yaml` 에서 문항별 정답을 찾아 제출 |
+| `mock_agent_vla.py` | **mock — 교체 대상** | Stage 1·2 인식(VLA) 모의 구현. CCTV 를 분석하지 않고, 받은 자연어 명령으로 `mock_demo_data.yaml` 에서 문항별 정답을 찾아 제출 |
 | `mock_agent_navigation.py` | **mock — 교체·개선 대상** | Stage 2 내비게이션: 목표 추종 제어 + 점유 격자 A\* 경로 계획 + 장애물 회피 |
 | `mock_agent_manipulation.py` | **mock — 교체·개선 대상** | 로봇팔 집기 동작(관절각 키프레임) |
 | `mock_demo_data.yaml` | 데모 데이터 | 시나리오에서 미리 뽑은 **장애물 + Stage 1·2 문항별 정답 좌표**. `tools/mock_data_builder/gen_mock_demo_data.py` 가 정답에 무작위 오답을 일부 섞어 생성합니다. 실제 참가자는 이 데이터가 없습니다 |
@@ -216,7 +216,7 @@ docker compose up
 1. **시작·등록** — `participant_app.py` 가 `MARCClient` 를 만들고 콜백을 등록한 뒤, `connect()`(등록
    → `SESSION_ACK`) → `run()`(백그라운드 수신 시작).
 2. **Stage 1 (인식·좌표 제출)** — 라운드마다 `on_mission` 콜백에서 `mock_agent_vla.process()` 가
-   받은 음성 명령에 해당하는 정답을 찾아 `GroundingResult` 로 돌려주고, 이를 `submit_grounding()` 으로 제출.
+   받은 자연어 명령에 해당하는 정답을 찾아 `GroundingResult` 로 돌려주고, 이를 `submit_grounding()` 으로 제출.
 3. **Stage 2 해석** — `on_stage2_mission` 콜백에서 `mock_agent_vla.process_stage2()` 가 그 문항의
    정답을 찾아 `GroundingResult` 로 돌려주고, 이를 `submit_stage2_grounding()` 으로 제출. 함께 받은
    `owner_position`(배치 위치)을 저장.
@@ -230,7 +230,7 @@ docker compose up
 참가자가 실제 코드로 교체할 위치입니다(파일명 기준).
 
 - `mock_agent_vla.py` — Stage 1·2 인식을 CCTV 분석 없이, `mock_demo_data.yaml` 에서 문항별
-  정답을 음성 명령으로 찾아 제출하는 방식으로 대신합니다.
+  정답을 자연어 명령으로 찾아 제출하는 방식으로 대신합니다.
 - `mock_demo_data.yaml` — Stage 1·2 문항별 정답 좌표와 장애물을 **시나리오에서 미리 뽑아** 둔
   데이터입니다(정답에는 무작위 오답이 일부 섞여 있어 부분 점수를 받습니다). 실제 대회 참가자는
   시나리오가 없으므로, 이 데이터에 의존하지 말고 인식으로 대체해야 합니다.
