@@ -355,6 +355,12 @@ docker compose --profile dataset-gen up
 bash marc.sh dataset-gen
 ```
 
+자주 사용하는 환경변수:
+
+- `ENV_MARC_SCENARIO` — 사용할 시나리오 선택(기본 `marc2026_chungmu`).
+- `HEADLESS` — GUI 없이 실행(`true`/`false`).
+- `TRAINER_SAVE_OFFLINE=0` — 오프라인 파일 저장을 끄고 ROS 2 토픽만 발행합니다.
+
 #### 결과물
 
 생성기를 실행하면 학습 데이터를 얻는 방법은 두 가지입니다.
@@ -389,13 +395,20 @@ bash marc.sh dataset-gen
 
 #### 다양한 장면 만들기
 
-화면의 버튼으로 학습 장면을 계속 새로 생성합니다.
+GUI 좌측 하단의 `Dataset Generator` 패널에서 각 장면에 무엇을 배치할지 고르고, 장면을 계속 새로
+생성합니다. 선택 상태는 시나리오별로 저장되어 다음 실행에도 유지됩니다.
 
-- `New Scene` — 카메라는 그대로 두고, 화각 안의 물건·사람만 다시 배치합니다.
-- `New Camera` — 카메라(미션)부터 다시 선택하여 배치합니다.
+**배치 대상 선택**
 
-자주 사용하는 환경변수: `ENV_MARC_SCENARIO`(시나리오 선택), `HEADLESS`(GUI 없이 실행),
-`MARC_TRAINER_DIR`(저장 위치), `TRAINER_SAVE_OFFLINE=0`(오프라인 파일 저장 끄기).
+- **Objects / Landmarks** — 시나리오의 사물 종류와 랜드마크 종류를 체크박스로 켜고 끕니다
+  (전체 선택·해제 지원).
+- **Peoples** — 사람 배치 방식을 person / pose 두 모드로 고릅니다. **person 모드** 는 고른 사람을
+  모든 자세로, **pose 모드** 는 고른 자세를 모든 사람으로 배치합니다. 사람 배치를 아예 끌 수도 있습니다.
+
+**장면 다시 만들기**
+
+- `New Scene` — 카메라는 그대로 두고, 화각 안의 대상만 위 선택대로 다시 배치합니다.
+- `New Camera` — 카메라부터 다시 선택해 배치합니다(카메라 콤보에서 특정 카메라 지정, 또는 `random` 으로 무작위).
 
 ---
 
