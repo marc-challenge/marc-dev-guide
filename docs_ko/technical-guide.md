@@ -398,6 +398,13 @@ bash marc.sh dataset-gen
 GUI 좌측 하단의 `Dataset Generator` 패널에서 각 장면에 무엇을 배치할지 고르고, 장면을 계속 새로
 생성합니다. 선택 상태는 시나리오별로 저장되어 다음 실행에도 유지됩니다.
 
+```{figure} _static/dataset-generator.png
+:alt: Dataset Generator GUI (뷰포트 2분할 + 배치 대상 선택 패널)
+
+Dataset Generator 실행 화면 — 좌: 미션 영역 조망(Viewport), 우: 선택 카메라 시점(Camera View),
+하단: 배치 대상 선택 패널(Objects·Landmarks·Peoples 체크리스트, New Scene / New Camera).
+```
+
 **배치 대상 선택**
 
 - **Objects / Landmarks** — 시나리오의 사물 종류와 랜드마크 종류를 체크박스로 켜고 끕니다
