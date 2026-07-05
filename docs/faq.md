@@ -80,6 +80,7 @@ containers, or volumes can conflict or serve stale cache.
 
 ---
 
+(notices)=
 ## Notices
 
 These three notices are **mandatory** and govern how you build and submit.
