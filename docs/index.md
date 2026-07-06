@@ -42,16 +42,8 @@ way:
   teams hit most often (troubleshooting), along with the **notices you must read** before you take
   part.
 
-That said, **anything about "the competition itself" — the rules, the schedule, the evaluation
-policy, the organizers — is deliberately kept out of this guide.** That content lives on the
-[competition homepage](https://marc-challenge.github.io/en/challenge/) as the single source of truth
-(SoT), so the two sites never drift apart. For fairness, the **answer scenarios, scoring seeds, and
-the specific numbers used in scoring** are not published either — the guide describes only the
-methodology.
-
-> **Status note (draft tone).** Dates, image tags, and wheel versions in this guide are
-> **provisional / under internal review** until the release freeze. Treat version strings
-> (e.g. `2026.1.0`, `v2026.x`) as examples.
+For the competition rules, schedule, evaluation policy, and organizers, see the
+[competition homepage](https://marc-challenge.github.io/en/challenge/).
 
 ## Who this is for
 
@@ -80,25 +72,18 @@ faq
 
 ## Important notices (read first)
 
-```{admonition} Three required notices
+```{admonition} Two required notices
 :class: warning
 
 1. **The evaluation runtime has no internet access.** You may use the internet *at build
    time* (to bake weights and dependencies into your image), but at runtime external
    network access, public APIs, and downloads are **prohibited**.
-2. **Third-party OSS / USD assets carry their own licenses.** Honour all license and
-   attribution terms for assets you use or redistribute.
-3. **The competition background location may change.** The only publicly distributed
+2. **The competition background location may change.** The only publicly distributed
    background USD is the practice scene (**chungmu**); the actual competition may use a
    different background.
 ```
 
 See [FAQ → Notices](notices) for the full text.
-
-## Versioning
-
-This guide is published as **versioned documentation** on Read the Docs and is aligned to
-release tags (`v2026.x`). The current draft targets release **2026.1.0** (provisional).
 
 ## Contact
 

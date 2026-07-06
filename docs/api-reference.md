@@ -268,7 +268,7 @@ Controls the robot body's motion and the robot arm.
   - `twist` (`geometry_msgs/Twist`, default `None`) — if given, this Twist is published as-is
     and the three arguments above are ignored
   - Returns: none
-  - Note: max allowed 1.5 m/s / 1.0 rad/s. The SDK does not automatically clamp excess input,
+  - Note: max allowed 1.5 m/s / 1.5 rad/s. The SDK does not automatically clamp excess input,
     so the agent must respect it.
 - `stop()`
   - Parameters: none
@@ -412,7 +412,7 @@ Every operations message has the structure `{ "header": {...}, "payload": {...} 
   - `linear.y` (`float`, m/s) — lateral (+ = left)
   - `angular.z` (`float`, rad/s) — yaw (+ = counter-clockwise)
   - Constraints: motion plane XY (2D), frame Z-up right-handed (REP-103), max linear speed
-    1.5 m/s / max angular speed 1.0 rad/s
+    1.5 m/s / max angular speed 1.5 rad/s
   - Note: `linear.z`, `angular.x`, `angular.y` are unused.
 - `arm/joint_command` — `sensor_msgs/JointState`
   - Topic: `/marc/{team_id}/robot/arm/joint_command`

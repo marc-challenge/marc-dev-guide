@@ -255,8 +255,9 @@ required code you use as-is**.
 | `participant_app.py` | Required (entry point) | Registers callbacks on `MARCClient` and wires the full Stage 1 / Stage 2 flow |
 | `mock_agent_vla.py` | **mock — replace** | Stage 1/2 perception (VLA) mock. Does not analyze CCTV; uses the received natural-language command to look up the per-problem answer in `mock_demo_data.yaml` and submit it |
 | `mock_agent_navigation.py` | **mock — replace or improve** | Stage 2 navigation mock. Plans a route and drives using pre-extracted obstacle data |
-| `mock_agent_manipulation.py` | **mock — replace or improve** | Robot arm picking motion (joint-angle keyframes) |
-| `mock_demo_data.yaml` | Demo data | The Stage 1/2 answer coordinates + obstacles pre-extracted from the scenario, referenced by the three mock agents (demo-only — see the overview) |
+| `arm_pick.py`, `arm_kin.py`, `gen3_6dof_vision_2f140.urdf`, `pnp_params.json` | Reference (use as-is) | The demo's actual picking motion. The same code as the manipulation kit (`manipulation/`), bundled into the demo folder |
+| `mock_agent_manipulation.py` | Reference (fallback) | A fixed-keyframe pick that needs no `placo`. Not the current execution path; kept as an alternative reference |
+| `mock_demo_data.yaml` | Demo data | The Stage 1/2 answer coordinates + obstacles pre-extracted from the scenario, referenced by the mock agents (demo-only — see the overview) |
 
 The three `mock_agent_*` files are the **mock implementations that stand in** for the agent
 code you will develop (perception, navigation, manipulation). `participant_app.py` calls
@@ -292,8 +293,9 @@ your real code.
   data and submit it.
 - `mock_agent_navigation.py` — Stage 2 navigation. Instead of detecting obstacles with
   sensors, it plans a route and drives using pre-extracted obstacle data.
-- `mock_agent_manipulation.py` — robot arm picking. It does not perceive the object's
-  position and picks with fixed joint keyframes.
+- Robot arm picking — the picking motion is performed by `arm_pick.py` (the manipulation kit);
+  only the pick location is supplied by the mock perception (VLA) from the demo data. Replace
+  that location computation with real perception.
 
 Since all three agents depend on the demo data, in the real competition you must replace
 them with your own real perception-and-detection code.
@@ -365,8 +367,8 @@ DemoParticipant().run()
 3. **Remove the scenario dependency** — change it to detect obstacles with
    `get_occupancy_map()` and the lidar/camera sensors instead of `mock_demo_data.yaml` (the
    scenario extract).
-4. **Improve navigation and picking if needed** — `mock_agent_navigation.py` /
-   `mock_agent_manipulation.py` can earn partial score as-is, so replace perception (1 and 2)
+4. **Improve navigation and picking if needed** — `mock_agent_navigation.py` and the pick
+   (`arm_pick.py` + the manipulation kit) can earn partial score as-is, so replace perception (1 and 2)
    first and improve these afterward.
 5. **Use the reveal hint** — in Stage 2, even if the grounding is wrong, you can continue the
    collection drive using the approximate location from `on_stage2_reveal` (the demo already
@@ -524,22 +526,26 @@ touching it.
 | File | Description |
 |---|---|
 | `urdf/gen3_6dof_vision_2f140.urdf` | Robot kinematics model (6-axis arm + Robotiq 2F-140 gripper). An information file that holds the link transforms directly so FK/IK can be solved from this one file, without external meshes |
-| `fk_ik.py` | A reference implementation of functions that convert both ways between the target pose of the end effector (gripper) you want to control the arm to reach and the joint angles at that pose. `fk()` takes joint angles and computes the gripper pose; `ik_pose()` takes a target pose (position and rotation) and computes the joint angles. Here the reference point of the gripper pose is the contact point that picks the object (the midpoint of the two finger pads) |
-| `arm_pick.py` | A reference implementation that performs a series of arm-control requests, from picking the target up to placing it in the rear basket. It sets several waypoints the whole motion must pass through, computes the joint angles at each with `fk_ik`, and publishes joint commands to move through them in order. It reads the pick parameters from `pnp_params.json`, and uses the built-in defaults if absent |
+| `arm_kin.py` | A reference implementation that converts between the gripper's target pose and the joint angles. The reference point of the gripper pose is the contact point that picks the object (the midpoint of the two finger pads). (Uses the `placo` library -- see the note below.) |
+| `arm_pick.py` | A reference implementation that performs a series of arm-control requests, from picking the target up to placing it in the rear basket. It sets several waypoints the motion passes through, computes the joint angles at each with `arm_kin`, and publishes joint commands to move through them in order. It reads the pick parameters from `pnp_params.json`, and uses the built-in defaults if absent |
+| `pnp_params.json` | Pick parameters (grasp depth, gripper close, speed, etc.). Values tuned with `manipulation_trainer` |
+
+`arm_kin.py` uses the `placo` library for kinematics. Install it with `pip install placo`; the judging
+runtime has no internet, so bake it into the image at build time (see the demo `Dockerfile`).
 
 The provided code and URDF can be used in two ways depending on how much you rely on them.
 
 - Using them to the maximum: leave the picking sequence (`arm_pick.py`) untouched and use it
   as-is like a finished tool, and only compute and pass in the target position and gripper
   pose to pick. Even this alone runs the baseline picking motion and can earn partial score.
-- Using them minimally: take only the FK/IK in `fk_ik.py` and the URDF as materials, and
+- Using them minimally: take only the FK/IK in `arm_kin.py` and the URDF as materials, and
   design the arm-control approach itself however you like to push the score higher. You do
   not have to be bound to the baseline's approach of setting several waypoints and chaining
   them; you may implement it with a different control approach.
 
 Either way, the only command that moves the robot is joint angles. You must convert the
 gripper pose you want into joint angles (and vice versa) and send them as ROS 2 joint
-commands, and for this conversion you use the URDF and `fk_ik.py` above. `fk_ik.py` is a
+commands, and for this conversion you use the URDF and `arm_kin.py` above. `arm_kin.py` is a
 starting point you can use as-is or refine to be more precise. The robot itself is already
 included in the platform.
 
@@ -589,7 +595,7 @@ shows the robot and the object to pick together, right: the robot base camera vi
 
 ### How to use the two together
 
-Use the reference code (`fk_ik.py` and `arm_pick.py`) as a starting point to write your
+Use the reference code (`arm_kin.py` and `arm_pick.py`) as a starting point to write your
 arm-control logic, and it is convenient for that code to use `marc_sdk`. Since the SDK
 handles protocol work such as the registration handshake and message conversion for you, you
 just complete registration first with `marc_sdk` and then send robot-control commands. The
