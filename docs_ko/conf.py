@@ -3,7 +3,6 @@
 # Built by the Korean RTD project via docs_ko/.readthedocs.yaml (sphinx.configuration:
 # docs_ko/conf.py), linked as a Translation of the English project. This config is
 # identical to docs/conf.py except language='ko' (set at the bottom).
-# Versions/tags below are PROVISIONAL until the release freeze.
 
 import os
 import sys
@@ -14,7 +13,7 @@ project = 'MARC 2026'
 copyright = '2026, IOTCOSS (IoT Convergence & Open Sharing System)'
 author = 'IOTCOSS'
 
-# Release / version — PROVISIONAL (aligned with marc-sdk 2026.1.0 and image tag v2026.1.0).
+# Release / version (aligned with marc-sdk 2026.1.0 and image tag v2026.1.0).
 release = '2026.1.0'
 version = '2026.1'
 

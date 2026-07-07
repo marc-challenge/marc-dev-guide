@@ -7,27 +7,29 @@
 **Symptom:** after `docker compose up` the Isaac Sim window shows a **black viewport**, the
 title reads *"New Stage\*"*, and the loading bar seems stuck.
 
-**This is normal — wait.** First startup builds the world (scene, people poses, landmarks,
-robot) and compiles shaders, which takes **several minutes** (2–5 min typical, longer on the
-very first run). Do **not** kill it. Startup is done when the logs show
-`[Runtime] Startup complete in <N>s` followed by
-`Auto-plan: waiting for a participant to register...`; the scene then appears. Follow
+**This is normal — wait.** Loading the 3D virtual campus data takes several minutes (2–5 min
+typical, longer on the very first run); do not kill it during that time. Startup is done when
+the logs show `[Runtime] Startup complete in <N>s` followed by
+`Auto-plan: waiting for a participant to register...`, and the scene then appears. Follow
 progress with `docker compose logs -f`.
 
 ### ROS 2 Humble <-> Isaac Sim Python conflict
 
-**Symptom:** import errors / wrong Python when launching the platform; the participant SDK
-(Python 3.10) and Isaac Sim (Python 3.11) collide.
+**Symptom:** import errors occur or the wrong Python is picked up when launching the platform.
+The participant SDK (Python 3.10) and Isaac Sim (Python 3.11) collide.
 
-**Fix:** keep the shells separate. Remove `/opt/ros` from `PYTHONPATH` and
-`LD_LIBRARY_PATH` in the Isaac Sim shell (the platform launch scripts already do this). Run
-your participant agent in the ROS 2 Humble (3.10) shell, and the platform in its own.
+**Fix:** keep the shells separate. Remove `/opt/ros` from `PYTHONPATH` and `LD_LIBRARY_PATH`
+in the Isaac Sim shell (the platform launch scripts already do this). Run your participant
+agent in the ROS 2 Humble (3.10) shell, and the platform in its own shell.
 
 ### GPU not detected
 
-Check the **NVIDIA Container Runtime** is installed, the host driver is current, and the
-container requests the GPU (`--gpus all` or the compose `deploy.resources` block). Verify
-with `nvidia-smi` on the host and inside the container.
+**Symptom:** the GPU is not visible inside the container, or the run fails with an error like
+`Failed to initialize NVML` or `could not select device driver`.
+
+**Fix:** check that the NVIDIA Container Runtime is installed, the host driver is current, and
+the container requests the GPU (`--gpus all` or the compose `deploy.resources` block). Verify
+with `nvidia-smi` both on the host and inside the container.
 
 ### RTX renderer crash right after startup (Segmentation fault)
 
@@ -66,9 +68,13 @@ If it still exits at the same point, as a secondary step disable IOMMU (VT-d) in
 
 ### `docker compose up` fails: `unknown or invalid runtime name: nvidia`
 
-The compose file requests `runtime: nvidia`. Even if `docker run --gpus all` works on your
-host (CDI path), the **named `nvidia` runtime may not be registered** with the Docker daemon.
-Register it once and restart Docker:
+**Symptom:** `docker compose up` fails with `unknown or invalid runtime name: nvidia`.
+
+**Cause:** the compose file requests `runtime: nvidia`, but even if `docker run --gpus all`
+works on your host (CDI path), the named `nvidia` runtime may not be registered with the Docker
+daemon.
+
+**Fix:** register it once and restart Docker.
 
 ```bash
 sudo nvidia-ctk runtime configure --runtime=docker
@@ -78,9 +84,14 @@ docker info | grep -i runtimes   # should now list "nvidia"
 
 ### DDS communication not working
 
-Confirm both machines share the **same `ROS_DOMAIN_ID`**, are on the same LAN, and that the
-firewall allows DDS (UDP, multicast for discovery). The demo uses `network_mode: host` so
-discovery happens on the host NIC. 8MP CCTV streaming needs gigabit-or-better LAN.
+**Symptom:** the participant application and the platform cannot find each other (discovery
+fails) or topics do not flow.
+
+**Fix:** confirm both machines share the same `ROS_DOMAIN_ID`, are on the same LAN, and that
+the firewall allows DDS (UDP, multicast for discovery). The demo uses `network_mode: host` so
+discovery happens on the host NIC. 8MP CCTV streaming needs gigabit-or-better LAN. Also, the
+platform uses Fast DDS (RMW), the default middleware of ROS 2 Humble, so keep your default
+settings too. Switching the RMW to something else (e.g. Cyclone DDS) can break discovery.
 
 ### Build fails: `marc-base:ros2-isaacsim-5.1: pull access denied`
 
@@ -140,24 +151,33 @@ On success it pulls the layers and prints a `Status:` line like the following at
 Status: Downloaded newer image for ghcr.io/marc-challenge/marc-platform-content:2026
 ```
 
-### Performance
+### Performance is slow or VRAM is short
 
-If frame rate or VRAM is tight, reduce resolution, lower the number of concurrent CCTV
-streams you subscribe to, and keep heavy inference on your own (separate) hardware.
+**Symptom:** the frame rate is low or VRAM is short.
 
-### Reusing an environment from a past MARC challenge (Docker conflicts)
+**Fix:** reduce resolution, lower the number of concurrent CCTV streams you subscribe to, and
+keep heavy inference on your own (separate) hardware.
 
-If you develop on a machine you used for an earlier MARC challenge, leftover Docker images,
-containers, or volumes can conflict or serve stale cache.
+### The organizers republished and announced an updated image (re-pulling the latest)
 
-- Reusing the same tag (e.g. `:latest`) may pick up an old image — **build and run new
-  images under a unique tag**.
-- Clean up old containers, volumes, and networks: inspect with `docker ps -a`,
-  `docker volume ls`, `docker network ls` and remove what you no longer need (use
-  `docker system prune` with care).
-- If you suspect stale cache, rebuild with `docker build --no-cache`.
-- Remove unused old base images with `docker image ls` if you hit disk-space or base-image
-  conflicts.
+**Symptom:** the organizers republished a fixed image under the same tag and announced it, but
+the previously pulled image is still used. Docker does not re-pull the same tag automatically.
+
+**Fix:** what the organizers republish is the platform content image
+(`ghcr.io/marc-challenge/marc-platform-content:2026`). Re-pull that image explicitly, then
+rebuild the platform.
+
+```bash
+# 1) Re-pull the updated content image (the same tag is refreshed to the latest digest)
+docker pull ghcr.io/marc-challenge/marc-platform-content:2026
+
+# 2) Rebuild and run the platform image with that content
+cd simulation-platform
+bash marc.sh platform
+```
+
+If the announcement gives a different tag or a separate image name, pull the announced name
+instead of the one above.
 
 ---
 
@@ -183,13 +203,3 @@ or redistribute. A consolidated third-party notices list ships with the public m
 The only publicly distributed background USD is the practice scene (**chungmu**). The actual
 competition may use a **different background**; do not hard-code assumptions tied to the
 practice scene's layout.
-
----
-
-## General
-
-**Where is the schedule?** Key dates (announcement, submission, finalist announcement,
-finals) are **provisional** and published on the competition homepage rather than detailed
-here. The finals are in Xi'an (date under internal review).
-
-**What is the Stage 2 destination?** Items are delivered to the **designated location**.

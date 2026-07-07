@@ -1,14 +1,14 @@
 # 제출 가이드
 
-이 페이지는 완성한 참가자 애플리케이션을 대회에 제출하는 방법을 설명합니다. 제출물은 JSON 파일이나 학습된 모델이 아니라, `docker compose up` 한 줄로 실행되는 참가자 애플리케이션 전체(리포지토리)입니다.
+이 페이지는 완성한 참가자 애플리케이션을 대회에 제출하는 방법을 설명합니다.
 
-> 잠정 안내: 아래 일정·collaborator 계정·예선 채점 HW 스펙은 내부 검토 단계이며 변경될 수 있습니다.
+이번 대회에 제출하는 것은 **주최 측이 그대로 실행할 수 있는 참가자 애플리케이션 코드 전체, 곧 리포지토리 하나**입니다. JSON 파일이나 학습된 모델을 내는 것이 아니라, `docker compose up` 한 줄로 실행되는 애플리케이션 전체를 제출합니다.
 
 ---
 
 ## 무엇을 제출하나
 
-제출물은 "정답"을 담은 파일이 아니라 "정답을 스스로 만들어 제출하는 프로그램"입니다. 주최측은 참가자가 올린 리포지토리를 그대로 clone 하여 `docker compose up` 한 줄로 실행하고, 실행된 에이전트가 대회가 진행되는 동안 ROS 2 로 답안을 제출합니다.
+주최 측은 참가자가 올린 리포지토리를 그대로 clone 하여 `docker compose up` 한 줄로 실행하고, 실행된 에이전트가 대회가 진행되는 동안 ROS 2 로 답안을 제출합니다.
 
 채점 대상은 그 프로그램이 실제로 낸 성적입니다. 제출하기 전에 자기 점수를 미리 확인하는 방법은 [기술 가이드 → 시뮬레이션 플랫폼(연습용)](technical-guide.md)의 "참가자 프로그램 실행 및 점수 확인"을 참고하십시오. 답안 payload 의 정확한 필드 규격은 [API 레퍼런스](api-reference.md)에 있습니다.
 
@@ -16,21 +16,18 @@
 
 ## 마감일에 할 일
 
-코드 제출 마감일에는 다음 두 가지를 반드시 완료해야 합니다. 이 두 가지가 곧 "제출"입니다.
+코드 제출 마감일에는 다음 세 가지를 반드시 완료해야 합니다. 이 세 가지가 곧 "제출"입니다.
 
-1. 팀의 GitHub Private 리포지토리 `master` 브랜치에 push 합니다. 모든 MARC 리포지토리는 Gitflow 를 따르며, `master` 가 제출·채점 대상이 되는 안정 브랜치입니다.
-2. 리포지토리 설정에서 `marc-challenge-office` 계정을 collaborator 로 추가합니다. 리포지토리가 Private 이므로, 이 초대가 없으면 주최측이 리포지토리를 clone 할 수 없습니다.
-
-주최측 안내에 따라 제출 시점 커밋에 태그를 다는 경우도 있습니다. 주최측은 이렇게 동결된 지점을 clone 하여 팀을 한 팀씩 순차적으로 채점합니다.
+1. 리포지토리가 `docker compose up` 한 줄로 실행되도록 만들어 둡니다. 자세한 요건은 아래 "`docker compose up` 한 줄로 실행되게 만들기" 를 참고하십시오.
+2. 팀의 GitHub Private 리포지토리 `master` 브랜치에 push 하고, 제출 커밋에 태그를 답니다(예선은 `qualifier`, 자세한 방법은 아래 "제출 커밋에 태그 달기" 참고). `master` 가 제출·채점 대상이 되는 안정 브랜치입니다.
+3. 리포지토리 설정에서 `marc-challenge-office` 계정을 collaborator 로 추가합니다. 리포지토리가 Private 이므로, 이 초대가 없으면 주최측이 리포지토리를 clone 할 수 없습니다.
 
 ```{admonition} 반드시 Private 리포지토리로 제출하십시오
 :class: warning
-공개(Public) 리포지토리에 올리면 아래에서 설명하는 토큰이 그대로 노출됩니다. Private 리포지토리에 `marc-challenge-office` 를 collaborator 로 추가하는 것이 유일한 제출 경로입니다.
+공개(Public) 리포지토리에 올리면 참가자의 코드와 팀의 인증 토큰이 그대로 노출됩니다. Private 리포지토리에 `marc-challenge-office` 를 collaborator 로 추가하는 것이 유일한 제출 경로입니다.
 ```
 
----
-
-## `docker compose up` 한 줄로 실행되게 만들기
+### `docker compose up` 한 줄로 실행되게 만들기
 
 주최측은 참가자 리포지토리를 새로 clone 한 상태에서 정확히 `docker compose up` 만 실행합니다. 다른 스크립트를 먼저 돌리거나 파일을 손으로 배치하는 등의 추가 단계는 개입하지 않습니다. 따라서 제출 전에 다음을 보장해야 합니다.
 
@@ -38,6 +35,23 @@
 - 개발하던 폴더가 아니라 다른 위치에 리포지토리를 새로 clone 하여, 그 상태에서 `docker compose up` 이 그대로 동작하는지 반드시 확인하십시오. 로컬에만 있는 파일이나 이미 받아 둔 캐시에 의존하면 주최측 환경에서 실패합니다.
 
 스타터킷의 `demo/docker-compose.yml` 을 출발점으로 삼으면, 표준 진입점과 빌드 컨텍스트가 이미 맞춰져 있어 그대로 이어서 개발할 수 있습니다.
+
+```{admonition} 런타임 인터넷 차단
+:class: warning
+심사 실행환경은 인터넷이 차단됩니다. 모든 가중치·의존성을 빌드 시점에 이미지에 포함(baking)시키고, 런타임에는 어떤 다운로드나 공개 API 호출도 할 수 없습니다. 제출 전에 반드시 인터넷 연결을 끊은 상태에서 정상 동작하는지 확인하십시오.
+```
+
+### 제출 커밋에 태그 달기
+
+주최 측은 제출 시점의 커밋을 명확히 하기 위해 **태그로 동결된 지점**을 clone 하여 채점합니다. 마지막으로 `master` 에 push 한 뒤, 제출할 커밋에 태그를 달아 함께 push 하십시오. 예선 제출에는 `qualifier` 태그를 사용합니다.
+
+```bash
+# On the commit you are submitting (usually the tip of master):
+git tag -a qualifier -m "MARC 2026 qualifier submission"
+git push origin qualifier
+```
+
+태그는 일반 `git push` 로는 올라가지 않으므로 `git push origin <태그명>` 으로 별도 push 해야 합니다. 주최 측은 이 태그를 checkout 하여 그 시점의 코드를 그대로 채점합니다.
 
 ---
 
@@ -50,26 +64,43 @@
 services:
   agent:
     environment:
-      MARC_TEAM_ID: "u1"                    # replace with your assigned team ID
-      MARC_TOKEN:   "PASTE_YOUR_TOKEN_HERE" # replace with your assigned token
-      ROS_DOMAIN_ID: "0"                    # same value as the platform machine
+      # For submission, hardcode your credentials by editing the defaults after ':-'
+      # (the organizer runs a bare `docker compose up`, with no env exports).
+      MARC_TEAM_ID:  "${MARC_TEAM_ID:-u1}"                  # your assigned team ID
+      MARC_TOKEN:    "${MARC_TOKEN:-PASTE_YOUR_TOKEN_HERE}" # your assigned token
+      ROS_DOMAIN_ID: "${ROS_DOMAIN_ID:-0}"                 # same value as the platform machine
       RMW_IMPLEMENTATION: "rmw_fastrtps_cpp"
 ```
 
-- `MARC_TEAM_ID` 와 `MARC_TOKEN` 에는 배정받은 팀 식별자와 토큰을 채웁니다. 이 값으로 채점 결과가 팀에 귀속됩니다.
+- `MARC_TEAM_ID` 와 `MARC_TOKEN` 의 `:-` 뒤 기본값을 배정받은 팀 식별자·토큰으로 바꿉니다. 주최측은 환경변수 없이 실행하므로 이 기본값이 곧 제출값이며, 이 값으로 채점 결과가 팀에 귀속됩니다.
 - `ROS_DOMAIN_ID` 와 `RMW_IMPLEMENTATION`, 그리고 `network_mode: host` 는 스타터킷 compose 의 기본값을 그대로 두면 됩니다. 참가자 애플리케이션과 플랫폼이 같은 LAN·같은 ROS 도메인에서 DDS 로 통신하도록 이미 맞춰져 있습니다.
 - 토큰은 Private 리포지토리의 compose 파일에만 두십시오. 공개 리포지토리나 공개 이미지에 넣지 마십시오.
 
-```{admonition} 런타임 인터넷 차단
-:class: warning
-심사 실행환경은 인터넷이 차단됩니다. 모든 가중치·의존성을 빌드 시점에 이미지에 포함(baking)시키고, 런타임에는 어떤 다운로드나 공개 API 호출도 하지 마십시오. 빌드 시점에는 인터넷을 사용할 수 있습니다.
+---
+
+## 본선 진출자의 최종 코드 제출
+
+지금까지 설명한 제출은 **예선** 채점을 위한 것입니다. 예선 결과로 본선 진출 팀이 정해지며, 본선에 진출한 팀은 이후에도 코드를 계속 개선할 수 있습니다.
+
+본선에 진출한 팀은 논문 camera-ready 제출 시점에 개선한 최종 코드를 제출합니다. 따라서 예선 제출 이후에도 본선 전까지 코드를 다듬어 반영할 기회가 있습니다. 최종 코드 제출 방식은 위에서 설명한 예선 제출 절차(`master` push + collaborator + 커밋 태그)와 동일하며, 이때 태그만 `finals` 로 사용합니다.
+
+```bash
+# On the final commit you are submitting for the finals:
+git tag -a finals -m "MARC 2026 finals (camera-ready) submission"
+git push origin finals
 ```
+
+본선 역시 인터넷이 차단된 환경에서 진행되므로, 예선과 동일한 유의사항을 그대로 따릅니다. 정리하면, 최종 코드도 예선과 마찬가지로 다음 세 가지를 완료합니다.
+
+1. 리포지토리가 `docker compose up` 한 줄로 실행되고, 인터넷 없이 동작하도록 만들어 둡니다.
+2. Private 리포지토리 `master` 브랜치에 push 하고, 제출 커밋에 `finals` 태그를 달아 push 합니다.
+3. `marc-challenge-office` 를 collaborator 로 추가합니다(이미 되어 있으면 유지).
 
 ---
 
 ## 예선 채점 하드웨어 (참고)
 
-에이전트 규모를 가늠하기 위한 참고값이며 잠정입니다.
+에이전트 규모를 가늠하기 위한 참고값입니다.
 
 | 항목 | 스펙 |
 |---|---|

@@ -1,11 +1,48 @@
 # API 레퍼런스
 
-이 페이지는 참가자가 참조하는 인터페이스의 단일 출처(SSoT)이며, 두 계층으로 나뉩니다.
+이 페이지는 참가자 클라이언트(에이전트)와 플랫폼 사이에 오가는 메시지에 대한 레퍼런스입니다. 등록
+핸드셰이크부터 미션 전달, 답안 제출, 채점 결과까지 어떤 메시지가 어떤 순서로 오가는지, 그리고 각
+메시지의 규격을 정리합니다.
 
-- marc_sdk 파이썬 API — 대부분의 참가자가 직접 호출하는 계층입니다. 클라이언트 생성·연결,
-  콜백, 센서 조회, 로봇 제어, 정답 제출, 그리고 주고받는 데이터 타입을 다룹니다.
-- ROS 2 인터페이스 — marc_sdk 가 내부적으로 플랫폼과 주고받는 하위 계층의 토픽·메시지·QoS·좌표계입니다.
-  SDK 를 쓰면 대부분 직접 다룰 일이 없지만, 저수준으로 접근하거나 규격을 확인할 때 참조합니다.
+## 메시지 흐름
+
+등록 핸드셰이크부터 Stage 1·2 답안 제출과 채점 결과까지, 플랫폼과 에이전트가 주고받는 순서는 아래와
+같습니다. 각 메시지의 상세 규격은 아래 "ROS 2" 절의 핸드셰이크·메시지 사전에 있습니다.
+
+```{mermaid}
+sequenceDiagram
+    participant A as 참가자 에이전트
+    participant P as 플랫폼
+    Note over A,P: 등록 핸드셰이크 (토큰은 전송하지 않음)
+    A->>P: SESSION_HELLO (100)
+    P->>A: SESSION_CHALLENGE (410)
+    A->>P: SESSION_PROOF (101)
+    P->>A: SESSION_ACK (400, session_key 발급)
+    Note over A,P: Stage 1 — grounding (선택한 문항 수만큼 회차 반복)
+    loop 각 회차
+        P->>A: MISSION_COMMAND (201)
+        A->>P: GROUNDING_RESULT (301)
+        P-->>A: TIME_REMAINING (203) / SCORE_RESULT (401)
+    end
+    P->>A: STAGE_TRANSITION (501)
+    Note over A,P: Stage 2 — grounding + 목표 지점 주행
+    P->>A: STAGE2_MISSION (211)
+    A->>P: STAGE2_GROUNDING_RESULT (311)
+    A->>P: cmd_vel (주행 명령, 반복)
+    A->>P: TASK_COMPLETE (302)
+    P->>A: SCORE_RESULT (401)
+    Note over A,P: 상태 COMPETITION_STATE (202): READY → STAGE1_RUN → STAGE2_RUN → FINISHED
+```
+
+## 구현 방법
+
+위 메시지 흐름을 참가자 코드에서 다루는 방법은 두 가지입니다.
+
+1. **marc_sdk (권장)** — Python SDK 가 ROS 2 통신·등록 핸드셰이크·세션·QoS 를 감싸 주고, 이벤트가
+   생길 때마다 미리 등록한 콜백을 호출합니다. 통신 방식을 몰라도 콜백만 구현하면 됩니다. 아래
+   "marc_sdk" 절을 참조하십시오.
+2. **ROS 2 직접** — SDK 없이 위 토픽과 JSON 메시지를 직접 주고받습니다. 저수준 제어가 필요하거나
+   Python 이 아닌 다른 언어로 구현할 때 사용합니다. 아래 "ROS 2" 절을 참조하십시오.
 
 SDK 를 준비하고 클라이언트를 만드는 기본 사용법은 [기술 가이드](technical-guide.md)에서 먼저 설명합니다.
 

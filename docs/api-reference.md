@@ -1,14 +1,52 @@
 # API Reference
 
-This page is the single source of truth (SSoT) for the interfaces participants reference, and
-it is split into two layers.
+This page is the reference for the messages exchanged between the participant client (agent)
+and the platform. It covers which messages flow in what order — from the registration
+handshake through mission delivery, answer submission, and scoring — and the specification of
+each message.
 
-- marc_sdk Python API — the layer most participants call directly. It covers client creation
-  and connection, callbacks, sensor queries, robot control, answer submission, and the data
-  types exchanged.
-- ROS 2 interface — the lower layer of topics, messages, QoS, and coordinate frames that
-  marc_sdk exchanges with the platform internally. With the SDK you rarely deal with it
-  directly, but you reference it when accessing at a low level or checking a specification.
+## Message flow
+
+The order in which the platform and the agent exchange messages, from the registration
+handshake through Stage 1/2 answer submission and scoring, is shown below. The detailed
+specification of each message is in the "ROS 2" section's handshake and message dictionary.
+
+```{mermaid}
+sequenceDiagram
+    participant A as Participant agent
+    participant P as Platform
+    Note over A,P: Registration handshake (the token is never sent)
+    A->>P: SESSION_HELLO (100)
+    P->>A: SESSION_CHALLENGE (410)
+    A->>P: SESSION_PROOF (101)
+    P->>A: SESSION_ACK (400, issues session_key)
+    Note over A,P: Stage 1 — grounding (repeats for the number of selected problems)
+    loop each round
+        P->>A: MISSION_COMMAND (201)
+        A->>P: GROUNDING_RESULT (301)
+        P-->>A: TIME_REMAINING (203) / SCORE_RESULT (401)
+    end
+    P->>A: STAGE_TRANSITION (501)
+    Note over A,P: Stage 2 — grounding + driving to the target
+    P->>A: STAGE2_MISSION (211)
+    A->>P: STAGE2_GROUNDING_RESULT (311)
+    A->>P: cmd_vel (drive commands, repeated)
+    A->>P: TASK_COMPLETE (302)
+    P->>A: SCORE_RESULT (401)
+    Note over A,P: State COMPETITION_STATE (202): READY -> STAGE1_RUN -> STAGE2_RUN -> FINISHED
+```
+
+## Implementation approaches
+
+There are two ways to handle this message flow in your code.
+
+1. **marc_sdk (recommended)** — the Python SDK wraps the ROS 2 communication, registration
+   handshake, session, and QoS, and calls the callbacks you registered whenever an event
+   occurs. You only implement the callbacks, without knowing the communication details. See the
+   "marc_sdk" section below.
+2. **ROS 2 directly** — exchange the topics and JSON messages above yourself, without the SDK.
+   Use this when you need low-level control or are implementing in a language other than Python.
+   See the "ROS 2" section below.
 
 The basic usage of preparing the SDK and creating a client is explained first in the
 [Technical Guide](technical-guide.md).
