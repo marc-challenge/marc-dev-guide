@@ -238,10 +238,44 @@ code.
 
 ### Usage
 
-It lives in the `demo/` folder at the starter kit root; run it from there.
+The baseline code is where you start development. A typical workflow looks like this.
+
+```{mermaid}
+flowchart TD
+    A["Copy demo/ into your dev environment"] --> B["Replace the mocks with your real perception/decision code"]
+    B --> C["Run and check on the host<br/>(launch.sh)"]
+    C -->|keep editing| B
+    C -->|mostly done| D["Verify it also runs in Docker<br/>(docker compose up)"]
+    D -->|something's off| B
+    D -->|passes| E["Final submission"]
+```
+
+Judging also runs your submitted Docker with `docker compose up`, so you must confirm the Docker
+run at least once before submitting.
+
+Both ways below run from the `demo/` folder, and you pass your team ID and token along.
+
+**1) Iterating during development — run directly on the host.** When you edit code often, it is
+faster to run on the host instead of rebuilding the Docker image every time. Keep the platform
+running in Docker and run only the demo.
 
 ```bash
 cd demo
+MARC_TEAM_ID=u1 MARC_TOKEN=<your-token> ./launch.sh
+```
+
+`launch.sh` sets up the ROS 2 humble environment (system `/opt/ros/humble` or the Isaac Sim built-in
+bridge), the `PYTHONPATH`, and the `placo` install automatically. The host must already have ROS 2
+humble (or Isaac Sim) and `numpy`, `pyyaml`.
+
+**2) Verifying before submission — run in Docker.** Once it is mostly working, confirm the behavior
+in Docker, the same way it is submitted and judged. The command below runs as-is in the judging
+environment (the required dependencies are baked into the image, so nothing to install on the host).
+
+```bash
+cd demo
+export MARC_TEAM_ID=u1
+export MARC_TOKEN=<your-token>
 docker compose up
 ```
 
@@ -611,7 +645,8 @@ failure. This control-and-query approach is identical to the competition runtime
 
 Write your control loop as a closed loop that reads the latest joint state
 (`arm/joint_states`, SDK `get_arm_state()`) and advances one step toward the target each time
-fresh state arrives, rather than pushing commands at a fixed wall-clock rate. The platform
+fresh state arrives, rather than pushing commands on a fixed real-time schedule (a fixed
+wall-clock rate, e.g. every 0.05 s). The platform
 steps the physics simulation at a fixed rate and publishes joint state on that step, so on a
 development machine where the simulation runs slower than real time (especially with the GUI on
 or a lower-end GPU) state updates may arrive less frequently. Advancing on each state update
@@ -619,6 +654,15 @@ instead of flooding commands at a fixed period keeps the arm on its intended pat
 simulation speed. The evaluation environment runs on high-end hardware close to real time, but
 pacing control to feedback this way gives consistent results on both your development machine
 and the evaluation environment.
+
+The two approaches compare as follows.
+
+| Aspect | Fixed rate (wall-clock time) — avoid | State-feedback closed loop — recommended |
+|---|---|---|
+| When commands are sent | On a fixed real-time interval, regardless of current state | Whenever new joint state (`get_arm_state()`) arrives |
+| One cycle | Wait a fixed time -> send command -> repeat | Wait for state -> read latest state -> advance one step toward the target -> repeat |
+| When the sim is slow | Keeps sending commands without the latest state -> the arm drifts off path | Advances as state arrives -> unaffected |
+| Result | Wobbles with simulation speed | Consistent path regardless of simulation speed |
 
 ### Confirming a successful pick and retrying
 

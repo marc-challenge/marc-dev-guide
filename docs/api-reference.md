@@ -418,8 +418,9 @@ Every operations message has the structure `{ "header": {...}, "payload": {...} 
   - Topic: `/marc/{team_id}/robot/arm/joint_command`
   - DoF: 6 (`joint_1`..`joint_6`), control mode = position target (radians)
   - State publish: on `arm/joint_states`, per physics step (nominal 20 Hz). The actual
-    delivery rate can drop with the run machine's real-time factor, so advance your control
-    loop with the arrival of this state feedback rather than on a fixed period.
+    delivery rate can drop depending on how fast the run machine keeps up with the simulation
+    relative to real time (its real-time factor) - when slower, state arrives less often - so
+    advance your control loop on the arrival of this state feedback rather than on a fixed period.
   - Note: a 6-DoF (non-redundant) manipulator + Robotiq 2F-140 gripper; reach comes from
     base + arm coordination. See the [Technical Guide -> Manipulation learning kit](technical-guide.md).
 - `gripper/holding` — `std_msgs/Bool` (published by the platform)
@@ -484,7 +485,7 @@ frozen release once the robot USD asset is finalized.
 | Axes | X = forward, Y = left, Z = up (right-handed) |
 | Units | metres; radians (Twist), degrees (YAML) |
 | TF | `/tf` (`tf2_msgs/TFMessage`), parent `world` -> robot prim |
-| Clock | `/clock` (`rosgraph_msgs/Clock`), simulation time |
+| Clock | `/clock` (`rosgraph_msgs/Clock`) — the simulator's internal time (sim-time; may differ from wall-clock) |
 
 Isaac Sim 5.x is Z-up right-handed, so no axis conversion is needed.
 

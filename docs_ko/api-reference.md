@@ -354,7 +354,7 @@ ACK 이후 모든 `request` 메시지는 발급받은 `session_key` 를 `header.
 - `arm/joint_command` — `sensor_msgs/JointState`
   - 토픽: `/marc/{team_id}/robot/arm/joint_command`
   - DoF: 6 (`joint_1`..`joint_6`), 제어 모드 = 위치 target(radian)
-  - 상태 발행: `arm/joint_states` 로 물리 스텝마다(공칭 20 Hz). 실제 전달률은 실행 머신의 real-time factor 에 따라 낮아질 수 있으니, 제어 루프는 고정 주기가 아니라 이 상태 피드백의 도착에 맞춰 진행하십시오.
+  - 상태 발행: `arm/joint_states` 로 물리 스텝마다(공칭 20 Hz). 실제 전달률은 실행 머신이 시뮬레이션을 실시간만큼 빠르게 처리하는 정도(real-time factor)에 따라 낮아질 수 있으니(느리면 상태가 더 드문드문 도착), 제어 루프는 정해진 시간 간격이 아니라 이 상태 피드백이 도착할 때마다 진행하십시오.
   - 비고: 6-DoF(비여유) 매니퓰레이터 + Robotiq 2F-140 그리퍼이며, 도달성은 본체+팔 협응에서 나옵니다. [기술 가이드 → 매니퓰레이션 학습 키트](technical-guide.md)를 참조하십시오.
 - `gripper/holding` — `std_msgs/Bool` (플랫폼 발행)
   - 토픽: `/marc/{team_id}/robot/gripper/holding`
@@ -409,7 +409,7 @@ ACK 이후 모든 `request` 메시지는 발급받은 `session_key` 를 `header.
 | 축 | X=앞, Y=왼쪽, Z=위 (오른손) |
 | 단위 | meter; radian(Twist), degree(YAML) |
 | TF | `/tf` (`tf2_msgs/TFMessage`), parent `world` -> 로봇 prim |
-| Clock | `/clock` (`rosgraph_msgs/Clock`), 시뮬레이션 시간 |
+| Clock | `/clock` (`rosgraph_msgs/Clock`) — 시뮬레이터 내부 시간(시뮬레이션 시간, sim-time; 실제 시각과 다를 수 있음) |
 
 Isaac Sim 5.x 는 Z-up 오른손 좌표계라 별도 축 변환이 불필요합니다.
 
