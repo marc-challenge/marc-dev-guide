@@ -393,8 +393,8 @@ bash marc.sh dataset-gen
 
 자주 사용하는 환경변수:
 
-- `ENV_MARC_SCENARIO` — 사용할 시나리오 선택(기본 `marc2026_chungmu`).
-- `HEADLESS` — GUI 없이 실행(`true`/`false`).
+- `ENV_MARC_SCENARIO` — 사용할 시나리오 선택(기본 `marc2026_demo`).
+- `HEADLESS` — GUI 표시 여부(`true`/`false`, 기본 `false`). GUI 로 실행하려면 호스트에서 `xhost +local:root` 를 먼저 실행합니다.
 - `TRAINER_SAVE_OFFLINE=0` — 오프라인 파일 저장을 끄고 ROS 2 토픽만 발행합니다.
 
 #### 결과물

@@ -15,10 +15,12 @@ order of steps is as follows.
 0. Confirm prerequisites — check that your PC meets the required conditions.
 1. Get the starter kit — download the bundle of files that is your starting point for
    development.
-2. Log in to NVIDIA NGC — to download the Docker image containing Isaac Sim (the base image),
-   you first need to authenticate with an NVIDIA account.
-3. Install the simulation platform (for practice) — build, on your own PC, the Docker image
-   that adds the competition simulation environment on top of that base image.
+2. Log in to NVIDIA NGC — the base image you build in the next step is based on NVIDIA's Isaac
+   Sim image. To pull that Isaac Sim image from NGC, you first need to authenticate with an
+   NVIDIA account.
+3. Install the simulation platform (for practice) — build, on your own PC, the base image that
+   adds the competition environment on top of the Isaac Sim image (the platform image itself is
+   then built automatically in the next step).
 4. Run the platform — run the simulation platform you installed.
 5. Run the demo — run the baseline code and watch the robot's behavior.
 
@@ -54,7 +56,7 @@ automatically as you follow the procedure in the starter kit and this guide. Set
 login state with the three steps below.
 
 1. Create a free account at [ngc.nvidia.com](https://ngc.nvidia.com) and sign in.
-2. Generate an API key — top-right profile -> Setup -> Generate API Key (or *Generate
+2. Generate an API key — top-right profile -> Account Settings -> Generate API Key (or *Generate
    Personal Key*). The key is **shown only once**, so copy and store it immediately.
 3. Log in to the registry — the Username is the literal string `$oauthtoken`, and the
    Password is the API key you generated.
@@ -80,14 +82,29 @@ automation script), you can pass the API key via a pipe like this.
 
 ### 3. Install the simulation platform (for practice)
 
-After you finish the NGC login, you can install the simulation platform (for practice) with
-the command below. When the build starts, it automatically downloads the base image you
-authenticated for earlier.
+The simulation platform is the competition environment layered on top of the NGC Isaac Sim
+image you authenticated for earlier. The base image underneath it (`marc-base:ros2-isaacsim-5.1`)
+is not pulled from a registry — it is a local image you build once on your own PC. The starter
+kit's `setup` command takes care of building this base image for you, so at first you only need
+to run the single line below (once). This command also shows the NGC login reminder.
 
 ```bash
-# Build context is the repo root (the Dockerfile COPYs simulation_app/, resources/, scenarios/).
-docker build -f simulation-platform/Dockerfile.practice -t marc-platform:practice .
+bash simulation-platform/marc.sh setup
 ```
+
+When the base image build finishes, you will see a message like the following at the end (the
+`...` in the middle is the build log).
+
+```text
+[marc] building base image (marc-base:ros2-isaacsim-5.1) - first time only, this takes a while.
+...
+[marc] setup complete. Next: bash simulation-platform/marc.sh platform
+```
+
+The platform image that sits on top of the base image is built and run automatically by
+`marc.sh platform` in the next step (4. Run the platform). At that point the content the
+platform needs is pulled automatically from the public registry (GHCR), so no separate
+authentication is required.
 
 ```{important}
 **Installation (the build) takes a considerable amount of time — it is not frozen.** Depending
@@ -133,6 +150,17 @@ cp .env.example .env
 ENV_MARC_SCENARIO=marc2026_demo
 ```
 
+```{note}
+The simulation platform included in the starter kit defaults to GUI mode (`HEADLESS=false`) —
+the platform's 3D viewport and score panel appear as a window. So the container can reach the
+host's display (X server), run the command below once on the host before starting.
+
+    xhost +local:root
+
+To run on a server with no display, or when you do not need the GUI, set `HEADLESS=true` in
+`.env` (in that case xhost is not needed).
+```
+
 The starter kit includes the dataset generator and the manipulation training tool in addition
 to the practice platform, so you must select and specify which of these to run. The practice
 platform is `platform`. The two commands below work identically, so choose whichever is
@@ -156,8 +184,8 @@ automatically).
 **The first run takes a considerable amount of time — it is not frozen.** Loading the 3D
 virtual campus data takes several minutes (typically 2–5 minutes, and longer on the very first
 run after the download). During this time the program window shows black, and the operating
-system may mark the window as `"Not Responding"` or show a warning dialog. This is normal, so
-do not force-quit — wait. The run is complete when the logs below appear:
+system may mark the window as `"Isaac Sim" is not responding` or show a warning dialog. This is
+normal, so do not force-quit — wait. The run is complete when the logs below appear:
 
     [Runtime] Startup complete in <N>s
     Auto-plan: waiting for a participant to register...
@@ -170,8 +198,8 @@ the register from your participant app. Watch progress with `docker compose logs
 :alt: Isaac Sim not-responding warning dialog
 :width: 70%
 
-The operating system's "Not Responding" warning that may appear during the first run. It is
-normal, so do not force-quit — press **Wait** and wait.
+The operating system's `"Isaac Sim" is not responding` warning that may appear during the first
+run. It is normal, so do not force-quit — press **Wait** and wait.
 ```
 
 ### 5. Run the demo
@@ -219,7 +247,7 @@ required and how far is for reference.
 | Item | Kind | Requirement |
 |---|---|---|
 | OS | Required | Ubuntu 22.04 LTS |
-| NVIDIA driver | Required | A recent NVIDIA driver compatible with Isaac Sim 5.1.0 (the reference environment is 580.x) |
+| NVIDIA driver | Required | Run a production driver (validated 580.x, min 570). 590+ beta/developer (Vulkan beta) drivers can crash the RTX renderer (see the [FAQ](faq.md)). |
 | Docker | Required | Docker Engine + NVIDIA Container Runtime (GPU use) |
 | Docker Compose | Required | v2 (`docker compose`) |
 | ROS 2 | Required | Humble |

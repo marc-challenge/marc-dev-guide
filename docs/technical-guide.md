@@ -426,8 +426,9 @@ bash marc.sh dataset-gen
 
 Commonly used environment variables:
 
-- `ENV_MARC_SCENARIO` — choose the scenario to use (default `marc2026_chungmu`).
-- `HEADLESS` — run without a GUI (`true`/`false`).
+- `ENV_MARC_SCENARIO` — choose the scenario to use (default `marc2026_demo`).
+- `HEADLESS` — whether to show the GUI (`true`/`false`, default `false`); to run with the GUI,
+  run `xhost +local:root` on the host first.
 - `TRAINER_SAVE_OFFLINE=0` — turn off offline file saving and publish only ROS 2 topics.
 
 #### Output
