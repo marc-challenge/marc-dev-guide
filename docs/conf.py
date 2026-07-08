@@ -42,7 +42,13 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_css_files = ['custom.css']  # 표 셀 줄바꿈(가로 스크롤 제거)
 
-# RTD slug: marc-challenge (set on the Read the Docs project, not here).
+# Sidebar EN <-> KO toggle (see _templates/layout.html). GitHub Pages serves the
+# English tree at /en/ and the Korean tree at /ko/, so the counterpart of the
+# current page is one directory up and over. This English config links to Korean.
+html_context = {
+    'lang_switch_prefix': '../ko/',
+    'lang_switch_label': '한국어',
+}
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
