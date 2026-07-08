@@ -1,16 +1,24 @@
 {% extends "!layout.html" %}
 {# GitHub Pages has no Read the Docs language flyout, so provide an EN <-> KO
-   toggle at the top of the sidebar. The English and Korean trees are built to
-   sibling /en/ and /ko/ paths with identical page names, so the counterpart of
-   the current page is lang_switch_prefix + pagename + '.html'. #}
+   toggle at the top of the sidebar. The two trees are built to sibling /en/ and
+   /ko/ paths with identical page names, so the counterpart of the current page
+   is lang_other_prefix + pagename + '.html'. The toggle always shows both labels
+   in the same order (한국어 then English); the current language is marked active
+   and the other is the switch button, with a divider below. Suppressed on RTD
+   (which has its own language flyout) via the html_context gate in conf.py. #}
 {% block menu %}
-  {% if lang_switch_prefix %}
+  {% if lang_current %}
   <p class="caption" role="heading"><span class="caption-text">Language / 언어</span></p>
-  <ul>
-    <li class="toctree-l1">
-      <a class="reference" href="{{ lang_switch_prefix }}{{ pagename }}.html">{{ lang_switch_label }}</a>
-    </li>
-  </ul>
+  <div class="marc-lang">
+    {% if lang_current == 'ko' %}
+    <span class="marc-lang__current">한국어</span>
+    <a class="marc-lang__switch" href="{{ lang_other_prefix }}{{ pagename }}.html">English</a>
+    {% else %}
+    <a class="marc-lang__switch" href="{{ lang_other_prefix }}{{ pagename }}.html">한국어</a>
+    <span class="marc-lang__current">English</span>
+    {% endif %}
+  </div>
+  <hr class="marc-lang__divider">
   {% endif %}
   {{ super() }}
 {% endblock %}

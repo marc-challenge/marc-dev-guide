@@ -42,16 +42,21 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_css_files = ['custom.css']  # 표 셀 줄바꿈(가로 스크롤 제거)
 
+# Drop the "View page source" link and the copied _sources tree from the output.
+html_show_sourcelink = False
+html_copy_source = False
+
 # Sidebar EN <-> KO toggle (see _templates/layout.html) — GitHub Pages ONLY.
 # Pages serves the English tree at /en/ and Korean at /ko/, so the counterpart of
-# the current page is one directory up and over (this Korean config links to English).
-# On Read the Docs the language switch is the built-in flyout, so the toggle is
-# suppressed there to avoid a duplicate, broken-URL switch.
+# the current page is one directory up and over. The toggle shows both "한국어" and
+# "English"; lang_current marks the active one, the other links across via
+# lang_other_prefix. On Read the Docs the language switch is the built-in flyout,
+# so it is suppressed here.
 html_context = {}
 if os.environ.get('READTHEDOCS', '') != 'True':
     html_context = {
-        'lang_switch_prefix': '../en/',
-        'lang_switch_label': 'English',
+        'lang_current': 'ko',
+        'lang_other_prefix': '../en/',
     }
 
 intersphinx_mapping = {

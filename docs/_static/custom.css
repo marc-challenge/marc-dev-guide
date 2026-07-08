@@ -21,3 +21,39 @@
 .rst-content table.docutils {
     width: 100%;
 }
+
+/* 사이드바 언어 토글(GitHub Pages 전용): 현재 언어는 활성 표시, 다른 언어는 전환 버튼.
+ * 항상 "한국어 English" 두 개를 함께 보여주고 아래 구분선으로 본문 내비게이션과 분리. */
+.marc-lang {
+    display: flex;
+    gap: 6px;
+    padding: 6px 1.618em 0;
+}
+.marc-lang__current,
+.marc-lang__switch {
+    flex: 0 0 88px;     /* 두 버튼 동일한 고정 너비 */
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 4px;
+    font-size: 90%;
+    line-height: 1.2;
+}
+.marc-lang__current {              /* 현재 선택된 언어 */
+    background: #2980b9;           /* rtd 강조색 */
+    color: #fff;
+    font-weight: 700;
+}
+.marc-lang__switch {               /* 다른 언어로 바꾸는 버튼 */
+    background: #4e4a4a;
+    color: #d9d9d9 !important;
+    text-decoration: none;
+}
+.marc-lang__switch:hover {
+    background: #6f6a75;
+    color: #fff !important;
+}
+.marc-lang__divider {              /* 토글 아래 구분선 */
+    border: 0;
+    border-top: 1px solid #4e4a4a;
+    margin: 10px 1.618em 4px;
+}
