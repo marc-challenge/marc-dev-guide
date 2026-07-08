@@ -78,6 +78,11 @@ bash simulation-platform/marc.sh select marc2026_chungmu   # or marc2026_demo
 ```
 
 ```{note}
+문항 선택은 플랫폼 컨테이너 안에서 실행되어 시나리오를 이미지에서 직접 읽습니다. 그래서 **처음 실행할 때
+플랫폼 이미지가 아직 없으면 자동으로 먼저 빌드**한 뒤 진행합니다(최초 1회만 시간이 걸리고, 이후에는 바로 뜹니다).
+```
+
+```{note}
 **문항 선택은 시나리오별로 따로 보관됩니다.** select 를 실행하면 그 시나리오의 보관본
 `problems.<scenario>.yaml` 과 플랫폼이 읽는 활성 파일 `problems.yaml` 이 함께 저장되고, 같은
 시나리오로 다시 select 하면 이전 선택을 불러와 이어서 편집합니다. 플랫폼은 실행 시 `problems.yaml` 의

@@ -94,6 +94,12 @@ bash simulation-platform/marc.sh select marc2026_chungmu   # or marc2026_demo
 ```
 
 ```{note}
+Problem selection runs inside the platform container and reads the scenario straight from the image.
+So the first time you run it, **if the platform image is not built yet it is built first**, then the
+selection proceeds (only the first run takes a while; afterwards it opens instantly).
+```
+
+```{note}
 **Problem selections are archived per scenario.** Running select saves both that scenario's
 archive `problems.<scenario>.yaml` and the active file `problems.yaml` that the platform
 reads, and running select again for the same scenario loads your previous selection so you
