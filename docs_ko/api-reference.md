@@ -185,7 +185,7 @@ SDK 를 준비하고 클라이언트를 만드는 기본 사용법은 [기술 �
 | `get_cctv_info(camera_id)` | CCTV 내부 파라미터 |
 | `get_robot_image(which)` | 로봇 카메라 RGB 영상 |
 | `get_robot_depth(which)` | 로봇 카메라 깊이 영상 |
-| `get_lidar()` | 로봇 라이다 스캔 |
+| `get_lidar()` | 로봇 라이다 포인트클라우드 |
 | `get_odom()` | 로봇 오도메트리 |
 | `get_imu()` | 로봇 IMU |
 | `get_arm_state()` | 로봇팔 관절 상태 |
@@ -210,9 +210,11 @@ SDK 를 준비하고 클라이언트를 만드는 기본 사용법은 [기술 �
 - `get_robot_depth(which: str = "base") -> sensor_msgs/Image | None`
   - `which` (`str`, 기본값 `"base"`) — 깊이 카메라 계열. `base`·`gripper` 중 하나(그 외 값은 `ValueError`).
   - 반환: 해당 카메라의 깊이 영상(`32FC1`, 픽셀 값 = 미터 거리).
-- `get_lidar() -> sensor_msgs/LaserScan | None`
+- `get_lidar() -> sensor_msgs/PointCloud2 | None`
   - 파라미터: 없음
-  - 반환: 로봇 2D 라이다 스캔. 근접 장애물 회피에 사용.
+  - 반환: 로봇 라이다의 최신 포인트클라우드. 탑재 라이다가 3차원(Velodyne VLP-16)이라 평면
+    `LaserScan` 이 아니라 포인트클라우드로 발행되며, 점 좌표는 `Base_LiDAR` 프레임 기준입니다.
+    근접 장애물 회피에 사용하며, 첫 메시지 도착 전에는 `None` 입니다.
 - `get_odom() -> nav_msgs/Odometry | None`
   - 파라미터: 없음
   - 반환: 로봇 오도메트리(위치·속도).
@@ -321,7 +323,7 @@ GroundingResult` 로 가져옵니다.
 - 운영(`/marc/ops/...`) — `header` / `payload` 구조와 숫자 `msg` id 를 담은 JSON 을 실은
   `std_msgs/String`. 세션·미션·제출·채점.
 - 센서 / 제어 — 전용 토픽의 ROS 2 표준 메시지(Image, CameraInfo, Twist, JointState,
-  LaserScan, OccupancyGrid, TF).
+  PointCloud2, OccupancyGrid, TF).
 
 ### 네임스페이스
 
@@ -340,7 +342,7 @@ GroundingResult` 로 가져옵니다.
 ├── {team_id}/robot/                      # per-team robot sensors / control
 │   ├── base_camera/{left,right}/image, info, depth/image, points
 │   ├── gripper_camera/{left,right}/image, info, depth/image, points
-│   ├── odom, imu, lidar/scan
+│   ├── odom, imu, lidar/points
 │   ├── arm/joint_states, arm/joint_command
 │   ├── gripper/holding                     #   grasp-hold feedback (std_msgs/Bool)
 │   ├── basket/occupied                     #   basket presence, Stage 2 (std_msgs/Bool)
@@ -421,7 +423,7 @@ ACK 이후 모든 `request` 메시지는 발급받은 `session_key` 를 `header.
 |---|---|---|
 | `odom` | `nav_msgs/Odometry` | 20 Hz |
 | `imu` | `sensor_msgs/Imu` | 20 Hz |
-| `lidar/scan` | `sensor_msgs/LaserScan` | — |
+| `lidar/points` | `sensor_msgs/PointCloud2` | — |
 | `arm/joint_states` | `sensor_msgs/JointState` | 20 Hz |
 | `gripper/holding` | `std_msgs/Bool` | 20 Hz |
 | `basket/occupied` | `std_msgs/Bool` | 20 Hz (Stage 2) |
@@ -434,8 +436,10 @@ ACK 이후 모든 `request` 메시지는 발급받은 `session_key` 를 `header.
 ```
 
 ```{note}
-정확한 라이다 거리/FOV/주기와 스테레오 해상도/baseline 은 로봇 USD 에셋 확정 후 동결 릴리스와 함께
-게시합니다.
+라이다는 지금도 `lidar/points` 토픽에 `sensor_msgs/PointCloud2` 로 정상 발행되며, 점 좌표는
+`Base_LiDAR` 프레임 기준입니다(SDK `get_lidar()`). 다만 정확한 거리/FOV/주기와 스테레오
+해상도/baseline 같은 세부 규격은 로봇 USD 에셋 확정 후 동결 릴리스와 함께 게시합니다. 즉 세부
+수치만 미확정이며, 센서 데이터 자체는 지금 개발에 바로 쓸 수 있습니다.
 ```
 
 ### TF / 좌표계

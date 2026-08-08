@@ -214,7 +214,7 @@ no value has been received yet.
 | `get_cctv_info(camera_id)` | CCTV intrinsics |
 | `get_robot_image(which)` | robot camera RGB image |
 | `get_robot_depth(which)` | robot camera depth image |
-| `get_lidar()` | robot lidar scan |
+| `get_lidar()` | robot lidar point cloud |
 | `get_odom()` | robot odometry |
 | `get_imu()` | robot IMU |
 | `get_arm_state()` | robot arm joint state |
@@ -245,9 +245,12 @@ no value has been received yet.
   - `which` (`str`, default `"base"`) — the depth camera family. One of `base`, `gripper`
     (other values raise `ValueError`).
   - Returns: that camera's depth image (`32FC1`, pixel value = distance in metres).
-- `get_lidar() -> sensor_msgs/LaserScan | None`
+- `get_lidar() -> sensor_msgs/PointCloud2 | None`
   - Parameters: none
-  - Returns: the robot's 2D lidar scan. Used for close-range obstacle avoidance.
+  - Returns: the robot's latest lidar point cloud. The onboard lidar is 3D (Velodyne
+    VLP-16), so its sweep is published as a point cloud rather than a flat `LaserScan`;
+    points are in the `Base_LiDAR` frame. Used for close-range obstacle avoidance, and is
+    `None` until the first message arrives.
 - `get_odom() -> nav_msgs/Odometry | None`
   - Parameters: none
   - Returns: robot odometry (position and velocity).
@@ -383,7 +386,7 @@ a low level or checking a specification. There are two transport families.
 - Operations (`/marc/ops/...`) — a `std_msgs/String` carrying JSON with a `header` / `payload`
   structure and a numeric `msg` id. Session, mission, submission, scoring.
 - Sensors / control — standard ROS 2 messages on dedicated topics (Image, CameraInfo, Twist,
-  JointState, LaserScan, OccupancyGrid, TF).
+  JointState, PointCloud2, OccupancyGrid, TF).
 
 ### Namespaces
 
@@ -402,7 +405,7 @@ a low level or checking a specification. There are two transport families.
 ├── {team_id}/robot/                      # per-team robot sensors / control
 │   ├── base_camera/{left,right}/image, info, depth/image, points
 │   ├── gripper_camera/{left,right}/image, info, depth/image, points
-│   ├── odom, imu, lidar/scan
+│   ├── odom, imu, lidar/points
 │   ├── arm/joint_states, arm/joint_command
 │   ├── gripper/holding                     #   grasp-hold feedback (std_msgs/Bool)
 │   ├── basket/occupied                     #   basket presence, Stage 2 (std_msgs/Bool)
@@ -498,7 +501,7 @@ Other robot sensors (all under `/marc/{team_id}/robot/`):
 |---|---|---|
 | `odom` | `nav_msgs/Odometry` | 20 Hz |
 | `imu` | `sensor_msgs/Imu` | 20 Hz |
-| `lidar/scan` | `sensor_msgs/LaserScan` | — |
+| `lidar/points` | `sensor_msgs/PointCloud2` | — |
 | `arm/joint_states` | `sensor_msgs/JointState` | 20 Hz |
 | `gripper/holding` | `std_msgs/Bool` | 20 Hz |
 | `basket/occupied` | `std_msgs/Bool` | 20 Hz (Stage 2) |
@@ -511,8 +514,11 @@ control and decision logic to act as messages arrive, not assuming a fixed rate.
 ```
 
 ```{note}
-The exact lidar range/FOV/rate and the stereo resolution/baseline are published with the
-frozen release once the robot USD asset is finalized.
+The lidar already publishes normally on `lidar/points` as `sensor_msgs/PointCloud2`, with
+points in the `Base_LiDAR` frame (SDK `get_lidar()`). Only the detailed specs -- exact
+range/FOV/rate and the stereo resolution/baseline -- are published with the frozen release
+once the robot USD asset is finalized. In other words, only the numbers are pending; the
+sensor data itself is ready to use in development now.
 ```
 
 ### TF / coordinate frames

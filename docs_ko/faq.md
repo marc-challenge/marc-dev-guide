@@ -174,6 +174,43 @@ bash marc.sh platform
 
 공지에서 다른 태그나 별도의 이미지 이름을 안내한 경우, 위 이름 대신 공지된 이름으로 pull 하십시오.
 
+### RViz2 에서 라이다/TF 를 볼 때 `TF_OLD_DATA` 경고가 계속 나옴
+
+**증상:** RViz2 에서 포인트클라우드는 표시되는데 `TF_OLD_DATA ignoring data from the past ...`
+경고가 끊임없이 출력되어 로그를 읽기 어렵습니다.
+
+**원인:** 플랫폼은 시뮬레이션 시간(sim time)으로 타임스탬프를 찍는데, RViz2 는 기본값이 실제 벽시계
+시간(wall clock)이라 두 시간원이 어긋나면서 나오는 경고입니다. 오작동이 아니며 표시는 정상입니다.
+
+**해결:** RViz2 를 sim time 으로 실행하십시오.
+
+```bash
+rviz2 --ros-args -p use_sim_time:=true
+```
+
+- Fixed Frame 은 `world` 로 둡니다.
+- PointCloud2 디스플레이의 Reliability Policy 는 `Best Effort` 로 두면 안정적입니다(Reliable 로도
+  수신되지만 디스커버리 타이밍에 따라 놓칠 수 있습니다).
+
+### 표준 tf2 도구가 `/tf_static` 을 수신하지 못함 (QoS 비호환)
+
+**증상:** RViz2 나 `tf2_ros.TransformListener` 로그에 아래 경고가 뜨고 static transform 이 하나도
+들어오지 않습니다.
+
+```text
+New publisher discovered on topic '/tf_static', offering incompatible QoS.
+No messages will be sent to it. Last incompatible policy: DURABILITY_QOS_POLICY
+```
+
+**원인:** 플랫폼이 `/tf_static` 을 `VOLATILE` 로 발행하는데, 표준 tf2 리스너(RViz2 포함)는
+`TRANSIENT_LOCAL` 을 요구하여 서로 호환되지 않습니다.
+
+**영향:** 라이다에 필요한 `arm_base_link -> Base_LiDAR` 변환은 동적 `/tf` 로도 함께 발행되므로 라이다
+사용에는 지장이 없습니다. static transform 에만 의존하는 코드만 영향을 받습니다.
+
+**해결:** 필요한 변환은 동적 `/tf` 로 조회하거나, `/tf_static` 을 구독할 때 `TRANSIENT_LOCAL` QoS 를
+명시하십시오. 이 항목은 동결 릴리스에서 플랫폼 쪽 QoS 를 함께 정정할 예정입니다.
+
 ---
 
 ## 공지

@@ -179,6 +179,46 @@ bash marc.sh platform
 If the announcement gives a different tag or a separate image name, pull the announced name
 instead of the one above.
 
+### Constant `TF_OLD_DATA` warnings when viewing lidar/TF in RViz2
+
+**Symptom:** The point cloud shows up in RViz2, but `TF_OLD_DATA ignoring data from the
+past ...` warnings stream continuously and drown out the log.
+
+**Cause:** The platform stamps messages with simulation time (sim time), while RViz2
+defaults to wall clock. When the two time sources disagree, this warning appears. It is not
+a malfunction -- the display itself is correct.
+
+**Fix:** Run RViz2 with sim time.
+
+```bash
+rviz2 --ros-args -p use_sim_time:=true
+```
+
+- Set Fixed Frame to `world`.
+- Set the PointCloud2 display's Reliability Policy to `Best Effort` for stable reception
+  (Reliable also works but may miss frames depending on discovery timing).
+
+### Standard tf2 tools receive nothing on `/tf_static` (incompatible QoS)
+
+**Symptom:** RViz2 or a `tf2_ros.TransformListener` logs the warning below and no static
+transform ever arrives.
+
+```text
+New publisher discovered on topic '/tf_static', offering incompatible QoS.
+No messages will be sent to it. Last incompatible policy: DURABILITY_QOS_POLICY
+```
+
+**Cause:** The platform publishes `/tf_static` as `VOLATILE`, but standard tf2 listeners
+(RViz2 included) require `TRANSIENT_LOCAL`, so the two are incompatible.
+
+**Impact:** The `arm_base_link -> Base_LiDAR` transform that lidar needs is also published on
+the dynamic `/tf`, so lidar use is unaffected. Only code that relies solely on static
+transforms is affected.
+
+**Fix:** Look up the transforms you need on the dynamic `/tf`, or declare `TRANSIENT_LOCAL`
+QoS when subscribing to `/tf_static`. This item will also be corrected on the platform side
+in the frozen release.
+
 ---
 
 (notices)=
