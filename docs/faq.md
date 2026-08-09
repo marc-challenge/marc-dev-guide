@@ -13,6 +13,35 @@ the logs show `[Runtime] Startup complete in <N>s` followed by
 `Auto-plan: waiting for a participant to register...`, and the scene then appears. Follow
 progress with `docker compose logs -f`.
 
+### No window appears, or no camera images, on WSL2
+
+**Symptom:** the 3D viewport window never appears even though you run with `HEADLESS=false`.
+When running headless, the CCTV camera topics (`/marc/env/cctv/...`) are missing from
+`ros2 topic list`. Non-camera topics such as IMU and odometry, however, show up normally.
+
+**Cause:** WSL2 (Linux running inside Windows) is not a supported environment. The platform
+runs on Isaac Sim, which is built around the RTX renderer, and both the viewport image and the
+CCTV / robot camera images are products of that renderer. WSL2 is not in the list of operating
+systems Isaac Sim supports, and this render path is not guaranteed to work where the GPU is
+passed through a virtualization layer. In practice, WSL2 has been observed to show no viewport
+window and to publish no camera topics. When no images are produced, no camera topics are
+published either. Sensor values that do not go through the renderer are unaffected, so this
+contrast means the problem is the renderer, not DDS communication.
+
+**How to check:** if the driver version reported by `nvidia-smi` inside Ubuntu matches a
+Windows driver number (for example 581.xx), you are on WSL2 — Linux drivers are numbered like
+`580.159.03`. The commands below also identify WSL2; either one is conclusive.
+
+```bash
+uname -r        # ends with -microsoft-standard-WSL2 on WSL2
+ls /dev/dxg     # this device node exists only on WSL2
+```
+
+**Fix:** install and run on native Ubuntu 22.04 (dual boot, or a separate Linux machine).
+Neither WSL2 nor virtual machines are supported. Note that the platform and your participant
+application may run on different machines, so a single Linux machine for the platform is
+enough.
+
 ### ROS 2 Humble <-> Isaac Sim Python conflict
 
 **Symptom:** import errors occur or the wrong Python is picked up when launching the platform.
