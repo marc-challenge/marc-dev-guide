@@ -219,24 +219,18 @@ rviz2 --ros-args -p use_sim_time:=true
 - PointCloud2 디스플레이의 Reliability Policy 는 `Best Effort` 로 두면 안정적입니다(Reliable 로도
   수신되지만 디스커버리 타이밍에 따라 놓칠 수 있습니다).
 
-### 표준 tf2 도구가 `/tf_static` 을 수신하지 못함 (QoS 비호환)
+### 표준 tf2 도구가 `/tf_static` 을 수신하지 못함 (QoS 비호환) — 해결됨(2026.R01)
 
-**증상:** RViz2 나 `tf2_ros.TransformListener` 로그에 아래 경고가 뜨고 static transform 이 하나도
-들어오지 않습니다.
+이 문제는 2026.R01 배포부터 해결되었습니다. 플랫폼이 `/tf_static` 을 `TRANSIENT_LOCAL`(latched)
+로 발행하므로 표준 tf2 리스너·RViz2 가 정상 수신합니다. CCTV 카메라 extrinsic 은 `world` 기준
+카메라 id 프레임(예: `rig_1_a`)으로 조회할 수 있습니다.
 
-```text
-New publisher discovered on topic '/tf_static', offering incompatible QoS.
-No messages will be sent to it. Last incompatible policy: DURABILITY_QOS_POLICY
+```bash
+ros2 run tf2_ros tf2_echo world rig_1_a
 ```
 
-**원인:** 플랫폼이 `/tf_static` 을 `VOLATILE` 로 발행하는데, 표준 tf2 리스너(RViz2 포함)는
-`TRANSIENT_LOCAL` 을 요구하여 서로 호환되지 않습니다.
-
-**영향:** 라이다에 필요한 `arm_base_link -> Base_LiDAR` 변환은 동적 `/tf` 로도 함께 발행되므로 라이다
-사용에는 지장이 없습니다. static transform 에만 의존하는 코드만 영향을 받습니다.
-
-**해결:** 필요한 변환은 동적 `/tf` 로 조회하거나, `/tf_static` 을 구독할 때 `TRANSIENT_LOCAL` QoS 를
-명시하십시오. 이 항목은 동결 릴리스에서 플랫폼 쪽 QoS 를 함께 정정할 예정입니다.
+이전 버전을 쓰고 있다면 최신 콘텐츠 이미지로 갱신하십시오(위 "주최측이 배포 이미지를 갱신·공지한
+경우" 참조).
 
 ---
 
@@ -259,3 +253,20 @@ No messages will be sent to it. Last incompatible policy: DURABILITY_QOS_POLICY
 
 공개되는 배경 USD 는 연습용 1종뿐입니다. 실제 대회는 다른 배경일 수 있으므로, 연습 씬
 레이아웃에 종속된 가정을 하드코딩하지 마십시오.
+
+## 변경 이력
+
+배포 이미지·키트의 버전별 주요 변경입니다. 갱신 방법은 위 "주최측이 배포 이미지를 갱신·공지한
+경우" 를 참조하십시오.
+
+### 2026.R01
+
+- 학습 데이터(데이터셋 생성기 GT 파일) 형식은 변경이 없습니다 — 기존에 만든 데이터·모델은 그대로
+  유효하며 재학습이 필요하지 않습니다.
+- CCTV 카메라의 위치·방향(extrinsic)을 `/tf_static` 에 카메라 id 프레임으로 발행하도록 정정했습니다.
+  이제 표준 tf2 로 `world` 와 카메라 id 사이 변환을 조회할 수 있고, latched(`TRANSIENT_LOCAL`)로
+  발행되어 RViz2·tf2 리스너가 정상 수신합니다.
+- 카메라별 지면 높이 토픽 `/marc/env/cctv/{id}/ground_height` (`std_msgs/Float32`, latched)를
+  추가했습니다. 픽셀을 world 로 역투영할 때 사용합니다.
+- 좌표 규약 설명을 보강했습니다(CCTV 프레임 = ROS optical, GT 파일 euler = USD prim; api-reference·
+  technical-guide 참조).

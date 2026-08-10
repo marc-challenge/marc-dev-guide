@@ -227,26 +227,18 @@ rviz2 --ros-args -p use_sim_time:=true
 - Set the PointCloud2 display's Reliability Policy to `Best Effort` for stable reception
   (Reliable also works but may miss frames depending on discovery timing).
 
-### Standard tf2 tools receive nothing on `/tf_static` (incompatible QoS)
+### Standard tf2 tools receive nothing on `/tf_static` (incompatible QoS) — fixed (2026.R01)
 
-**Symptom:** RViz2 or a `tf2_ros.TransformListener` logs the warning below and no static
-transform ever arrives.
+This was fixed in the 2026.R01 release. The platform now publishes `/tf_static` as
+`TRANSIENT_LOCAL` (latched), so standard tf2 listeners and RViz2 receive it normally. CCTV
+camera extrinsics can be looked up by their camera id frame (e.g. `rig_1_a`) relative to `world`.
 
-```text
-New publisher discovered on topic '/tf_static', offering incompatible QoS.
-No messages will be sent to it. Last incompatible policy: DURABILITY_QOS_POLICY
+```bash
+ros2 run tf2_ros tf2_echo world rig_1_a
 ```
 
-**Cause:** The platform publishes `/tf_static` as `VOLATILE`, but standard tf2 listeners
-(RViz2 included) require `TRANSIENT_LOCAL`, so the two are incompatible.
-
-**Impact:** The `arm_base_link -> Base_LiDAR` transform that lidar needs is also published on
-the dynamic `/tf`, so lidar use is unaffected. Only code that relies solely on static
-transforms is affected.
-
-**Fix:** Look up the transforms you need on the dynamic `/tf`, or declare `TRANSIENT_LOCAL`
-QoS when subscribing to `/tf_static`. This item will also be corrected on the platform side
-in the frozen release.
+If you are on an older version, update to the latest content image (see "The organizers
+republished and announced an updated image" above).
 
 ---
 
@@ -272,3 +264,20 @@ or redistribute. A consolidated third-party notices list ships with the public m
 The only publicly distributed background USD is the practice scene (**chungmu**). The actual
 competition may use a **different background**; do not hard-code assumptions tied to the
 practice scene's layout.
+
+## Change history
+
+Key changes to the distributed images and kit, by version. See "The organizers republished and
+announced an updated image" above for how to update.
+
+### 2026.R01
+
+- The training data (Dataset Generator GT files) format is unchanged — data and models you have
+  already produced remain valid, and no retraining is required.
+- CCTV camera extrinsics are now published on `/tf_static` with the camera id as the frame name.
+  You can look up the transform between `world` and a camera id with standard tf2, and it is
+  published latched (`TRANSIENT_LOCAL`) so RViz2 and tf2 listeners receive it.
+- Added a per-camera ground-height topic `/marc/env/cctv/{id}/ground_height` (`std_msgs/Float32`,
+  latched). Use it when back-projecting pixels to world coordinates.
+- Expanded the coordinate-convention notes (CCTV frame = ROS optical, GT file euler = USD prim;
+  see api-reference and technical-guide).

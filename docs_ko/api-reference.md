@@ -183,6 +183,7 @@ SDK 를 준비하고 클라이언트를 만드는 기본 사용법은 [기술 �
 | `list_cctv()` | 사용 가능한 CCTV id 목록 |
 | `get_cctv_image(camera_id)` | CCTV RGB 영상 |
 | `get_cctv_info(camera_id)` | CCTV 내부 파라미터 |
+| `get_cctv_ground_height(camera_id)` | CCTV 지면 높이(world z, m) |
 | `get_robot_image(which)` | 로봇 카메라 RGB 영상 |
 | `get_robot_depth(which)` | 로봇 카메라 깊이 영상 |
 | `get_lidar()` | 로봇 라이다 포인트클라우드 |
@@ -197,13 +198,16 @@ SDK 를 준비하고 클라이언트를 만드는 기본 사용법은 [기술 �
 
 - `list_cctv() -> list[str]`
   - 파라미터: 없음
-  - 반환: 탐색된 CCTV 카메라 id 목록. 이 id 를 아래 두 함수에 넘깁니다.
+  - 반환: 탐색된 CCTV 카메라 id 목록. 이 id 를 아래 CCTV 함수들에 넘깁니다.
 - `get_cctv_image(camera_id: str) -> sensor_msgs/Image | None`
   - `camera_id` (`str`) — 조회할 CCTV id (`list_cctv()` 로 확인)
   - 반환: 해당 카메라의 최신 RGB 프레임(인코딩 `rgb8`). VLA 인지의 주 입력.
 - `get_cctv_info(camera_id: str) -> sensor_msgs/CameraInfo | None`
   - `camera_id` (`str`) — 조회할 CCTV id
   - 반환: 해당 카메라의 내부 파라미터(투영 행렬 K 등). 픽셀↔3D 변환에 사용.
+- `get_cctv_ground_height(camera_id: str) -> float | None`
+  - `camera_id` (`str`) — 조회할 CCTV id
+  - 반환: 이 카메라가 내려다보는 지면 평면의 높이(world z, meter). 픽셀을 world 로 역투영할 때 지면 평면(`z = ground_height`)으로 씁니다. 카메라마다 다릅니다.
 - `get_robot_image(which: str = "base_left") -> sensor_msgs/Image | None`
   - `which` (`str`, 기본값 `"base_left"`) — 로봇 카메라 위치. `base_left`·`base_right`·`gripper_left`·`gripper_right` 중 하나(그 외 값은 `ValueError`).
   - 반환: 해당 카메라의 최신 RGB 영상(`rgb8`).
@@ -407,8 +411,9 @@ ACK 이후 모든 `request` 메시지는 발급받은 `session_key` 를 `header.
 - CCTV (환경)
   - `/marc/env/cctv/{id}/image` — `sensor_msgs/Image`, RGB(`rgb8`)
   - `/marc/env/cctv/{id}/info` — `sensor_msgs/CameraInfo`, intrinsic(K)
+  - `/marc/env/cctv/{id}/ground_height` — `std_msgs/Float32`, 이 카메라가 내려다보는 지면 평면의 높이(world z, meter). latched 라 늦게 구독해도 즉시 받습니다.
   - 속성: 해상도 1280 x 720(HD, 16:9), `frame_id` = `{camera_id}`
-  - 비고: 사용 가능한 id 는 `/marc/env/cctv/` 하위 토픽을 조회하여 확인합니다.
+  - 비고: 사용 가능한 id 는 `/marc/env/cctv/` 하위 토픽을 조회하여 확인합니다. 각 카메라의 위치·방향(extrinsic)은 `/tf_static` 으로 발행됩니다(아래 TF / 좌표계 절 참조). 지면 높이는 픽셀을 world 로 역투영할 때 지면 평면(`z = ground_height`)으로 쓰며, 카메라마다 다릅니다.
 - 로봇 스테레오 카메라
   - 본체(`base_camera/`, 주행 + 탐색)와 그리퍼(`gripper_camera/`, 근거리 pick-and-place)에 각각 스테레오 카메라가 있습니다.
   - 각 카메라: `left`/`right` RGB(`rgb8`), `depth/image`(`32FC1`, m), `points`(`sensor_msgs/PointCloud2`)
@@ -449,10 +454,34 @@ ACK 이후 모든 `request` 메시지는 발급받은 `session_key` 를 `header.
 | 표준 | ROS 2 REP-103 |
 | 축 | X=앞, Y=왼쪽, Z=위 (오른손) |
 | 단위 | meter; radian(Twist), degree(YAML) |
-| TF | `/tf` (`tf2_msgs/TFMessage`), parent `world` -> 로봇 prim |
+| TF (로봇) | `/tf` (`tf2_msgs/TFMessage`), parent `world` -> 로봇 prim |
+| TF (CCTV) | `/tf_static` (`tf2_msgs/TFMessage`), parent `world` -> 각 CCTV (frame = `camera_id`), latched |
 | Clock | `/clock` (`rosgraph_msgs/Clock`) — 시뮬레이터 내부 시간(시뮬레이션 시간, sim-time; 실제 시각과 다를 수 있음) |
 
-Isaac Sim 5.x 는 Z-up 오른손 좌표계라 별도 축 변환이 불필요합니다.
+world 좌표계와 로봇·주행 프레임은 REP-103 Z-up 오른손이라 별도 축 변환이 필요 없습니다.
+
+#### CCTV 카메라 프레임
+
+각 CCTV 카메라의 위치·방향(extrinsic)은 `/tf_static` 에 발행됩니다. 부모 프레임은 `world`,
+자식 프레임 이름은 카메라 id(예: `rig_1_a`)로 CameraInfo·이미지 토픽의 `frame_id` 와 같습니다.
+따라서 tf2 로 `world` 와 카메라 id 사이 변환을 조회하면 그 카메라의 절대 world pose 를 바로 얻습니다.
+
+```bash
+ros2 run tf2_ros tf2_echo world rig_1_a
+```
+
+이 카메라 프레임은 ROS 표준 카메라 optical 규약을 따릅니다 — `+Z` 가 카메라가 바라보는 방향(전방),
+`+X` 가 이미지 오른쪽, `+Y` 가 이미지 아래입니다. CameraInfo 의 K 행렬과 같은 규약이므로, 픽셀을
+world 로 역투영할 때 K 와 이 extrinsic 을 그대로 함께 쓰면 되고 별도의 축 뒤집기는 필요하지
+않습니다. (위의 REP-103 Z-up 은 world·로봇 프레임 설명입니다. CCTV 카메라 프레임은 이미지
+투영을 위해 optical 규약을 씁니다.)
+
+#### SDK 와 TF
+
+SDK 의 getter 는 센서 데이터(이미지·깊이·라이다·상태 등)를 제공합니다. 좌표 변환(TF)은 SDK 가
+감싸지 않으므로 표준 tf2 로 조회합니다 — CCTV extrinsic(`world` -> `camera_id`)뿐 아니라 로봇 센서
+프레임(`Base_LiDAR`, `arm_base_link` 등)도 마찬가지입니다. (로봇 본체 pose 는 예외적으로
+`get_world_pose()` 로도 제공됩니다.)
 
 ```{admonition} 미션area 지면 평면 가정
 :class: note

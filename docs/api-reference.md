@@ -212,6 +212,7 @@ no value has been received yet.
 | `list_cctv()` | list of available CCTV ids |
 | `get_cctv_image(camera_id)` | CCTV RGB image |
 | `get_cctv_info(camera_id)` | CCTV intrinsics |
+| `get_cctv_ground_height(camera_id)` | CCTV ground height (world z, m) |
 | `get_robot_image(which)` | robot camera RGB image |
 | `get_robot_depth(which)` | robot camera depth image |
 | `get_lidar()` | robot lidar point cloud |
@@ -226,7 +227,7 @@ no value has been received yet.
 
 - `list_cctv() -> list[str]`
   - Parameters: none
-  - Returns: the list of discovered CCTV camera ids. Pass these ids to the two functions
+  - Returns: the list of discovered CCTV camera ids. Pass these ids to the CCTV functions
     below.
 - `get_cctv_image(camera_id: str) -> sensor_msgs/Image | None`
   - `camera_id` (`str`) — the CCTV id to query (check with `list_cctv()`)
@@ -236,6 +237,11 @@ no value has been received yet.
   - `camera_id` (`str`) — the CCTV id to query
   - Returns: that camera's intrinsics (projection matrix K, etc.). Used for pixel<->3D
     conversion.
+- `get_cctv_ground_height(camera_id: str) -> float | None`
+  - `camera_id` (`str`) — the CCTV id to query
+  - Returns: the height (world z, metres) of the ground plane this camera looks down on. Use it
+    as the ground plane (`z = ground_height`) when back-projecting pixels to world coordinates.
+    Differs per camera.
 - `get_robot_image(which: str = "base_left") -> sensor_msgs/Image | None`
   - `which` (`str`, default `"base_left"`) — the robot camera position. One of
     `base_left`, `base_right`, `gripper_left`, `gripper_right` (other values raise
@@ -482,8 +488,9 @@ Every operations message has the structure `{ "header": {...}, "payload": {...} 
 - CCTV (environment)
   - `/marc/env/cctv/{id}/image` — `sensor_msgs/Image`, RGB (`rgb8`)
   - `/marc/env/cctv/{id}/info` — `sensor_msgs/CameraInfo`, intrinsics (K)
+  - `/marc/env/cctv/{id}/ground_height` — `std_msgs/Float32`, the height (world z, metres) of the ground plane this camera looks down on. Latched, so it arrives immediately even if you subscribe late.
   - Properties: resolution 1280 x 720 (HD, 16:9), `frame_id` = `{camera_id}`
-  - Note: discover available ids by listing topics under `/marc/env/cctv/`.
+  - Note: discover available ids by listing topics under `/marc/env/cctv/`. Each camera's extrinsic is published on `/tf_static` (see TF / coordinate frames below). The ground height is used as the ground plane (`z = ground_height`) when back-projecting pixels to world coordinates, and differs per camera.
 - Robot stereo cameras
   - There is a stereo camera on each of the base (`base_camera/`, driving + search) and the
     gripper (`gripper_camera/`, close-range pick-and-place).
@@ -528,10 +535,36 @@ sensor data itself is ready to use in development now.
 | Standard | ROS 2 REP-103 |
 | Axes | X = forward, Y = left, Z = up (right-handed) |
 | Units | metres; radians (Twist), degrees (YAML) |
-| TF | `/tf` (`tf2_msgs/TFMessage`), parent `world` -> robot prim |
+| TF (robot) | `/tf` (`tf2_msgs/TFMessage`), parent `world` -> robot prim |
+| TF (CCTV) | `/tf_static` (`tf2_msgs/TFMessage`), parent `world` -> each CCTV (frame = `camera_id`), latched |
 | Clock | `/clock` (`rosgraph_msgs/Clock`) — the simulator's internal time (sim-time; may differ from wall-clock) |
 
-Isaac Sim 5.x is Z-up right-handed, so no axis conversion is needed.
+The world frame and the robot / driving frames are REP-103 Z-up right-handed, so no axis conversion is needed.
+
+#### CCTV camera frame
+
+Each CCTV camera's extrinsic (position and orientation) is published on `/tf_static`. The parent
+frame is `world`, and the child frame name is the camera id (e.g. `rig_1_a`), the same as the
+`frame_id` of the CameraInfo and image topics. So looking up the transform between `world` and a
+camera id with tf2 gives you that camera's absolute world pose directly.
+
+```bash
+ros2 run tf2_ros tf2_echo world rig_1_a
+```
+
+This camera frame follows the standard ROS camera optical convention — `+Z` is the viewing
+direction (forward), `+X` is image-right, `+Y` is image-down. It is the same convention as the
+CameraInfo K matrix, so when back-projecting pixels to world coordinates you can use K and this
+extrinsic together directly, with no extra axis flip. (The REP-103 Z-up above describes the world
+and robot frames; the CCTV camera frame uses the optical convention for image projection.)
+
+#### SDK and TF
+
+The SDK getters provide sensor data (images, depth, lidar, states, and so on). Coordinate
+transforms (TF) are not wrapped by the SDK, so look them up with standard tf2 — this applies to
+the CCTV extrinsic (`world` -> `camera_id`) as well as the robot sensor frames (`Base_LiDAR`,
+`arm_base_link`, and so on). (The robot body pose is also available through `get_world_pose()` as
+an exception.)
 
 ```{admonition} Mission-area ground-plane assumption
 :class: note

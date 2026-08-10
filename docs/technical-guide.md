@@ -502,12 +502,32 @@ is as follows.
   "detections": [
     { "class": "master_chef_can", "kind": "object",
       "bbox": [412, 133, 468, 210], "occlusion": 0.12 }
-  ]
+  ],
+  "camera": {
+    "prim_path": "/world/cctv_rigs/rig_3/Mounts/Mount_B/Camera_B",
+    "position": [-84.50, 98.50, 18.78],
+    "orientation_euler_deg": { "roll": -59.4, "pitch": 14.4, "yaw": 171.1 },
+    "focal_length_mm": 5.0, "horizontal_aperture_mm": 5.6,
+    "vertical_aperture_mm": 3.15, "ground_height": 16.1
+  }
 }
 ```
 
 `bbox` is in pixel coordinates in the order `[x_min, y_min, x_max, y_max]`, and `occlusion`
 is the degree of occlusion (0 = not occluded).
+
+The `camera` block holds each camera's intrinsics and extrinsic. `position` is in world
+coordinates, and `orientation_euler_deg` is the USD camera prim's rotation (roll/pitch/yaw, ZYX
+order).
+
+```{admonition} Rotation convention
+:class: warning
+The `orientation_euler_deg` in this file is in the USD camera frame (`-Z` forward, `+Y` up). The
+camera frame that the runtime `/tf_static` gives you, however, follows the ROS optical convention
+(`+Z` forward, `+Y` down). The two describe the same camera but differ by a 180° rotation about
+the X axis. To use it with the CameraInfo K matrix, the optical convention (i.e. `/tf_static`)
+matches directly; if you use this file's euler with K, account for that 180° difference.
+```
 
 #### Making varied scenes
 

@@ -461,11 +461,30 @@ bash marc.sh dataset-gen
   "detections": [
     { "class": "master_chef_can", "kind": "object",
       "bbox": [412, 133, 468, 210], "occlusion": 0.12 }
-  ]
+  ],
+  "camera": {
+    "prim_path": "/world/cctv_rigs/rig_3/Mounts/Mount_B/Camera_B",
+    "position": [-84.50, 98.50, 18.78],
+    "orientation_euler_deg": { "roll": -59.4, "pitch": 14.4, "yaw": 171.1 },
+    "focal_length_mm": 5.0, "horizontal_aperture_mm": 5.6,
+    "vertical_aperture_mm": 3.15, "ground_height": 16.1
+  }
 }
 ```
 
 `bbox` 는 픽셀 좌표 `[x_min, y_min, x_max, y_max]` 순서이고, `occlusion` 은 가림 정도(0=가려지지 않음)입니다.
+
+`camera` 블록은 각 카메라의 intrinsic 과 extrinsic 입니다. `position` 은 world 좌표,
+`orientation_euler_deg` 는 USD 카메라 prim 의 회전(roll/pitch/yaw, ZYX 순)입니다.
+
+```{admonition} 회전 규약 주의
+:class: warning
+이 파일의 `orientation_euler_deg` 는 USD 카메라 프레임(`-Z` 가 전방, `+Y` 가 위)입니다. 반면
+런타임 `/tf_static` 이 주는 카메라 프레임은 ROS optical 규약(`+Z` 가 전방, `+Y` 가 아래)입니다.
+두 값은 같은 카메라를 가리키지만 표현이 X 축 기준 180° 회전만큼 다릅니다. CameraInfo 의 K 와
+함께 쓸 때는 optical 규약(=`/tf_static`)이 바로 맞고, 이 파일의 euler 를 K 에 쓰려면 그 180°
+차이를 반영해야 합니다.
+```
 
 #### 다양한 장면 만들기
 
