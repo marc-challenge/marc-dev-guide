@@ -572,9 +572,24 @@ bash marc.sh manip-trainer
 연습 환경을 실행하면 두 개의 화면과 조작 패널이 함께 나타납니다. 왼쪽은 로봇과 집을 물체를 한눈에 보는 조망
 뷰(`Viewport`)이고, 오른쪽은 로봇 베이스에 달린 카메라 시점(`Base Camera`)입니다.
 
-로봇팔을 움직이려면 먼저 참가자 클라이언트가 한 번 등록(registration)을 마쳐야 합니다. 등록 전에는
-패널에 `no client - Register / connect first` 로 표시되고, 등록이 끝나면 `team <id> connected` 로
-바뀌면서 팔 명령이 로봇에 전달됩니다. 등록은 연습 세션마다 처음 한 번만 하면 됩니다.
+이 연습 환경에는 대회 런타임과 달리 등록(registration) 절차가 없습니다. 팀 등록과 세션 발급 같은
+대회 진행 계층은 싣지 않고 로봇 입출력만 제공하기 때문이며, 그래서 배정 토큰도 필요하지 않습니다.
+참가자 클라이언트가 팔 관절 명령을 보내기 시작하면 그대로 로봇에 전달됩니다. 패널의 접속 표시도
+이 관절 명령이 들어오는지로 판단해, 명령을 보내기 전에는 `no client - Register / connect first` 로,
+보내기 시작하면 `team <id> connected` 로 바뀝니다. 앞의 문구가 등록을 요구하는 것처럼 보이는 것은
+표기 오류이며 다음 배포에서 정정됩니다.
+
+`marc_sdk` 를 쓰는 경우 `client.connect()` 는 응답을 기다리다 시간이 지나면
+`[REGISTER] no SESSION_ACK within 30s` 를 남기고 `False` 를 반환합니다. 연습 환경에서는 응답할
+상대가 없어서 나오는 정상적인 결과이며 오류가 아닙니다. 그 시점에 ROS 2 노드와 통신 채널은 이미
+만들어져 있으므로 팔 제어와 상태 조회는 그대로 동작합니다. 기다리는 시간이 아깝다면 타임아웃을 짧게
+주고 반환값을 확인하지 않으면 됩니다.
+
+```python
+client = MARCClient.from_env()   # MARC_TOKEN may be any non-empty value here
+client.connect(timeout=3.0)      # the trainer has no registration - ignore the result
+client.send_arm_command(...)     # commands take effect right away
+```
 
 아래 패널에서 집을 물체 종류를 고르고(`Pick target`), 팔이 바로 닿는 위치(`Place near`)나 조금 이동해야
 닿는 위치(`Place far`)에 물체를 놓거나, 팔 자세를 초기화(`Reset arm pose`)하면서 집기 동작을 반복해
@@ -599,9 +614,9 @@ bash marc.sh manip-trainer
 ### 두 가지를 함께 쓰는 방법
 
 참조 코드(`arm_kin.py` · `arm_pick.py`)를 출발점으로 팔 제어 로직을 작성하되, 그 코드는 `marc_sdk` 를
-이용하는 것이 편리합니다. 등록 핸드셰이크와 메시지 변환 같은 프로토콜 처리를 SDK 가 대신 해 주므로,
-참가자는 `marc_sdk` 로 먼저 등록(register)을 마친 뒤 로봇 제어 명령을 보내면 됩니다. 등록을 마쳐야
-트레이너가 제어 명령에 반응합니다.
+이용하는 것이 편리합니다. 메시지 변환과 ROS 2 통신 같은 처리를 SDK 가 대신 해 주므로 참가자는 제어
+로직에만 집중할 수 있습니다. 대회 런타임에서는 등록 핸드셰이크까지 SDK 가 처리해 주고, 연습 환경에서는
+앞서 설명한 대로 등록 없이 바로 제어 명령을 보내면 됩니다.
 
 집기 성공률은 집을 물체의 위치·크기·방향 등에 따라 제어를 얼마나 잘 최적화하느냐에 크게 좌우됩니다.
 따라서 `manipulation_trainer` 에서 물체 종류와 배치를 바꿔 가며 다양한 상황을 반복해 시험하고, 그

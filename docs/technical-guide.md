@@ -626,10 +626,26 @@ When you run the practice environment, two views and a control panel appear toge
 left is an overview view (`Viewport`) that shows the robot and the object to pick at a glance;
 on the right is the view from the camera mounted on the robot base (`Base Camera`).
 
-To move the robot arm, the participant client must first complete registration once. Before
-registration, the panel shows `no client - Register / connect first`, and once registration
-finishes it changes to `team <id> connected` and arm commands are delivered to the robot. You
-only need to register once, at the start of each practice session.
+Unlike the competition runtime, this practice environment has no registration step. It carries
+only robot I/O, not the competition layer that registers teams and issues sessions, so you do
+not need your assigned token either. As soon as the participant client starts sending arm
+joint commands, they are delivered to the robot. The panel decides what to show from those
+joint commands as well: before you send any it shows `no client - Register / connect first`,
+and once you start sending it changes to `team <id> connected`. That first message looks like
+it is asking for registration, which is a wording mistake we will correct in the next release.
+
+If you use `marc_sdk`, `client.connect()` waits for a reply and, once the timeout passes,
+logs `[REGISTER] no SESSION_ACK within 30s` and returns `False`. In the practice environment
+this is the normal result — there is simply nothing on the other side to answer — and not an
+error. The ROS 2 node and its communication channels already exist at that point, so arm
+control and state queries work as usual. If you would rather not wait, pass a short timeout
+and do not check the return value.
+
+```python
+client = MARCClient.from_env()   # MARC_TOKEN may be any non-empty value here
+client.connect(timeout=3.0)      # the trainer has no registration - ignore the result
+client.send_arm_command(...)     # commands take effect right away
+```
 
 In the panel below, choose the object type to pick (`Pick target`), place the object at a
 position the arm can reach directly (`Place near`) or one that requires moving a little
@@ -657,10 +673,10 @@ shows the robot and the object to pick together, right: the robot base camera vi
 ### How to use the two together
 
 Use the reference code (`arm_kin.py` and `arm_pick.py`) as a starting point to write your
-arm-control logic, and it is convenient for that code to use `marc_sdk`. Since the SDK
-handles protocol work such as the registration handshake and message conversion for you, you
-just complete registration first with `marc_sdk` and then send robot-control commands. The
-trainer responds to control commands only after registration is complete.
+arm-control logic, and it is convenient for that code to use `marc_sdk`. Since the SDK handles
+message conversion and ROS 2 communication for you, you can concentrate on the control logic.
+In the competition runtime the SDK also handles the registration handshake; in the practice
+environment you just send control commands directly, as described above.
 
 The pick success rate depends heavily on how well you optimize control for the position,
 size, and orientation of the object to pick. So in `manipulation_trainer`, test various

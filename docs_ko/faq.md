@@ -232,6 +232,38 @@ ros2 run tf2_ros tf2_echo world rig_1_a
 이전 버전을 쓰고 있다면 최신 콘텐츠 이미지로 갱신하십시오(위 "주최측이 배포 이미지를 갱신·공지한
 경우" 참조).
 
+### 매니퓰레이션 연습 환경에서 `no SESSION_ACK within 30s` 가 나오고 등록이 안 됨
+
+**증상:** 연습 환경(`manip-trainer`)을 띄우고 클라이언트를 실행하면 다음 로그가 남고 등록이
+끝나지 않습니다. 조작 패널도 `no client - Register / connect first` 상태로 남아 있습니다.
+
+```text
+[REGISTER] starting handshake to /marc/ops/register
+[REGISTER] no SESSION_ACK within 30s - check token/runtime
+```
+
+**원인:** 오류가 아니라 연습 환경의 정상 동작입니다. 이 환경은 로봇 입출력만 제공하고 팀 등록·세션
+발급 같은 대회 진행 계층은 싣지 않으므로, 등록 요청에 응답할 상대가 없습니다. 배정 토큰도 필요하지
+않습니다. `/marc/ops/register` 토픽이 목록에 보이는 것은 클라이언트 자신이 그 토픽을 만들었기
+때문입니다.
+
+**해결:** 등록 결과를 기다리지 말고 그대로 로봇 제어로 넘어가십시오. 타임아웃을 짧게 주고 반환값을
+확인하지 않으면 됩니다. `connect()` 가 돌아온 시점에 ROS 2 노드와 통신 채널은 이미 만들어져 있어
+팔 제어와 상태 조회는 정상 동작합니다.
+
+```python
+client = MARCClient.from_env()   # MARC_TOKEN may be any non-empty value here
+client.connect(timeout=3.0)      # the trainer has no registration - ignore the result
+client.send_arm_command(...)     # commands take effect right away
+```
+
+베이스라인 코드(`participant_app.py`)를 출발점으로 삼았다면, 그 코드는 대회 런타임 기준이라
+`connect()` 가 실패하면 실행을 멈추도록 되어 있습니다. 연습 환경에서 쓸 때는 그 중단 처리를 빼십시오.
+
+패널에는 클라이언트가 팔 관절 명령을 보내기 시작하면 `team <id> connected` 로 바뀝니다. 그 전까지
+표시되는 `no client - Register / connect first` 는 등록을 요구하는 뜻이 아니며, 문구 자체는 다음
+배포에서 정정됩니다. 클라이언트와 연습 환경의 `MARC_TEAM_ID` 는 서로 같아야 합니다.
+
 ---
 
 ## 공지
@@ -256,8 +288,8 @@ ros2 run tf2_ros tf2_echo world rig_1_a
 
 ## 변경 이력
 
-배포 이미지·키트의 버전별 주요 변경입니다. 갱신 방법은 위 "주최측이 배포 이미지를 갱신·공지한
-경우" 를 참조하십시오.
+배포 이미지·키트의 버전별 주요 변경입니다. 새 리비전을 받으려면 스타터킷을 `git pull` 로 갱신한 뒤
+플랫폼을 다시 빌드하십시오(`bash marc.sh platform` — 참조된 콘텐츠 이미지를 자동으로 받습니다).
 
 ### 2026.R01
 

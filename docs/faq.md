@@ -240,6 +240,43 @@ ros2 run tf2_ros tf2_echo world rig_1_a
 If you are on an older version, update to the latest content image (see "The organizers
 republished and announced an updated image" above).
 
+### `no SESSION_ACK within 30s` in the manipulation practice environment
+
+**Symptom:** you start the practice environment (`manip-trainer`) and run your client, but
+registration never completes and the following is logged. The control panel also stays at
+`no client - Register / connect first`.
+
+```text
+[REGISTER] starting handshake to /marc/ops/register
+[REGISTER] no SESSION_ACK within 30s - check token/runtime
+```
+
+**Cause:** this is not an error but the normal behaviour of the practice environment. It
+provides only robot I/O and does not carry the competition layer that registers teams and
+issues sessions, so nothing is there to answer the registration request. Your assigned token
+is not needed either. The `/marc/ops/register` topic appears in the topic list because your
+own client created it.
+
+**Fix:** do not wait for a registration result — go straight to controlling the robot. Pass a
+short timeout and do not check the return value. By the time `connect()` returns, the ROS 2
+node and its communication channels already exist, so arm control and state queries work
+normally.
+
+```python
+client = MARCClient.from_env()   # MARC_TOKEN may be any non-empty value here
+client.connect(timeout=3.0)      # the trainer has no registration - ignore the result
+client.send_arm_command(...)     # commands take effect right away
+```
+
+If you started from the baseline code (`participant_app.py`), note that it targets the
+competition runtime and stops when `connect()` fails. Remove that stop when you use it against
+the practice environment.
+
+The panel changes to `team <id> connected` once your client starts sending arm joint commands.
+The `no client - Register / connect first` message shown until then does not mean registration
+is required; the wording itself will be corrected in the next release. The `MARC_TEAM_ID` of
+your client and of the practice environment must match.
+
 ---
 
 (notices)=
@@ -267,8 +304,9 @@ practice scene's layout.
 
 ## Change history
 
-Key changes to the distributed images and kit, by version. See "The organizers republished and
-announced an updated image" above for how to update.
+Key changes to the distributed images and kit, by version. To pick up a new revision, `git pull`
+the starter kit and rebuild the platform (`bash marc.sh platform`), which pulls the referenced
+content image.
 
 ### 2026.R01
 
