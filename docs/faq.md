@@ -308,6 +308,22 @@ Key changes to the distributed images and kit, by version. To pick up a new revi
 the starter kit and rebuild the platform (`bash marc.sh platform`), which pulls the referenced
 content image.
 
+### 2026.R02
+
+- The training data (Dataset Generator GT files) format is unchanged — data and models you have
+  already produced remain valid, and no retraining is required.
+- Stage 1 scoring now resolves the reference landmark's expected coordinate within the camera the
+  problem specifies. Previously, when landmarks with the same name were placed under several
+  cameras, the expected coordinate could come from a same-named landmark under a different camera —
+  for example, a problem about the parking-lot camera could be scored against a trash can of the
+  same name in the park.
+- Because of this correction, the `anchor_coord` result changes for some problems. Treat scores
+  from earlier practice runs as indicative only, and re-run after updating. The submission format
+  and the scored items are unchanged, so there is nothing to change in your code.
+- The demo's reference answer data (`demo/mock_demo_data.yaml`) was regenerated as well. If you use
+  the demo as a reference implementation, `git pull` on the starter kit picks it up.
+- We identified this from a detailed report by a participating team. Thank you for reporting it.
+
 ### 2026.R01
 
 - The training data (Dataset Generator GT files) format is unchanged — data and models you have
