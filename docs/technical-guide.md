@@ -470,6 +470,8 @@ Commonly used environment variables:
 - `HEADLESS` — whether to show the GUI (`true`/`false`, default `false`); to run with the GUI,
   run `xhost +local:root` on the host first.
 - `TRAINER_SAVE_OFFLINE=0` — turn off offline file saving and publish only ROS 2 topics.
+- `TRAINER_AUTO_SCENES` — generate several scenes automatically and exit (see "Generating many
+  scenes at once" below).
 
 #### Output
 
@@ -489,7 +491,10 @@ Once you run the generator, there are two ways to obtain the training data.
 - **Offline files (repeated training)** — the way to use data extracted to files when
   training a model repeatedly. It is saved as
   `trainer_output/<scenario>/scene_<number>/<camera>.json` (+ a `.png` of the same name), and
-  repeated runs accumulate rather than overwriting existing scenes.
+  repeated runs accumulate rather than overwriting existing scenes. A `<camera>_overlay.png` is
+  saved in the same folder as well. It is the image with the ground-truth boxes drawn on top, so
+  opening a single one lets you confirm at a glance that the labels for that scene sit on the
+  objects.
 
 The ground-truth JSON is shared by the groundtruth topic and the offline files, and its form
 is as follows.
@@ -563,6 +568,29 @@ record that state as one scene. You keep making new scenes with the two buttons 
 - `Switch Camera` — changes the camera first, then places (pick a specific camera from the
   camera combo, or `random` for a random one). Use it to move on to a scene from a
   **different viewpoint**.
+
+#### Generating many scenes at once
+
+Collecting enough data for training takes a lot of scenes, and pressing the buttons that many
+times is tedious. Set `TRAINER_AUTO_SCENES` to the number of scenes you want and the generator
+creates them without the GUI and then exits. It changes the camera between scenes, so the
+viewpoints are mixed as well.
+
+```bash
+cd simulation-platform
+
+# Generate 100 scenes without the GUI, then exit.
+TRAINER_AUTO_SCENES=100 HEADLESS=true docker compose --profile dataset-gen up
+```
+
+One run generates at most 200 scenes before exiting. If you ask for more than that, it generates
+200, tells you how many are left, and stops - just run it again. Scene numbers continue from
+where they left off, so earlier scenes are not overwritten and the dataset keeps growing.
+
+```{tip}
+The default is 0. In that case the generator behaves as described above, with the GUI panel and
+its buttons.
+```
 
 ---
 

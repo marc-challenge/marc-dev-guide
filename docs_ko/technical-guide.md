@@ -434,6 +434,7 @@ bash marc.sh dataset-gen
 - `ENV_MARC_SCENARIO` — 사용할 시나리오 선택(기본 `marc2026_demo`).
 - `HEADLESS` — GUI 표시 여부(`true`/`false`, 기본 `false`). GUI 로 실행하려면 호스트에서 `xhost +local:root` 를 먼저 실행합니다.
 - `TRAINER_SAVE_OFFLINE=0` — 오프라인 파일 저장을 끄고 ROS 2 토픽만 발행합니다.
+- `TRAINER_AUTO_SCENES` — 장면을 자동으로 여러 개 만들고 종료합니다(아래 "장면을 한 번에 많이 만들기" 참고).
 
 #### 결과물
 
@@ -449,7 +450,9 @@ bash marc.sh dataset-gen
   - `/tf_static` (`tf2_msgs/TFMessage`) — 각 카메라의 위치·방향(extrinsics). 위치·방향 추정에 사용합니다.
 - **오프라인 파일 (반복 학습)** — 파일로 추출해 둔 데이터를 활용해 모델을 반복적으로 학습시킬 때 쓰는
   방식입니다. `trainer_output/<시나리오>/scene_<번호>/<카메라>.json` (+ 같은 이름의 `.png`) 로
-  저장되며, 실행을 반복하면 기존 장면을 덮어쓰지 않고 누적합니다.
+  저장되며, 실행을 반복하면 기존 장면을 덮어쓰지 않고 누적합니다. 같은 폴더에 `<카메라>_overlay.png`
+  도 함께 저장됩니다. 정답 상자를 이미지 위에 그려 둔 것이라, 한 장만 열어 보면 그 장면의 라벨이
+  물체에 제대로 붙었는지 눈으로 바로 확인할 수 있습니다.
 
 정답 JSON 은 groundtruth 토픽과 오프라인 파일에 공통으로 쓰이며, 형태는 다음과 같습니다.
 
@@ -515,6 +518,28 @@ Dataset Generator 실행 화면 — 좌: 미션 영역 조망(Viewport), 우: �
   구성만 다른** 장면을 여러 장 얻을 때 사용합니다.
 - `Switch Camera` — 카메라부터 바꿔서 배치합니다(카메라 콤보에서 특정 카메라를 지정하거나, `random`
   으로 무작위 선택). **다른 시점의** 장면으로 넘어갈 때 사용합니다.
+
+#### 장면을 한 번에 많이 만들기
+
+학습에 쓸 만큼 데이터를 모으려면 장면이 많이 필요한데, 버튼을 그만큼 누르는 것은 번거롭습니다.
+`TRAINER_AUTO_SCENES` 에 만들고 싶은 장면 수를 지정하면 화면 없이 자동으로 생성하고 종료합니다.
+장면마다 카메라를 바꿔 가며 배치하므로 시점도 골고루 섞입니다.
+
+```bash
+cd simulation-platform
+
+# Generate 100 scenes without the GUI, then exit.
+TRAINER_AUTO_SCENES=100 HEADLESS=true docker compose --profile dataset-gen up
+```
+
+한 번 실행에 최대 200 장면까지 만들고 종료합니다. 그보다 많이 지정하면 200 장면을 만든 뒤 남은
+개수를 알려 주고 끝나므로, 다시 실행하시면 됩니다. 장면 번호는 이어서 매겨지기 때문에 앞서 만든
+장면을 덮어쓰지 않고 계속 쌓입니다.
+
+```{tip}
+지정하지 않으면 기본값은 0 이고, 이때는 지금까지 설명한 대로 GUI 패널에서 버튼으로 장면을
+만드는 방식으로 동작합니다.
+```
 
 ---
 

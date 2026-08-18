@@ -308,6 +308,23 @@ Key changes to the distributed images and kit, by version. To pick up a new revi
 the starter kit and rebuild the platform (`bash marc.sh platform`), which pulls the referenced
 content image.
 
+### 2026.R03
+
+- Fixed the ground-truth (bounding box) coordinates produced by the dataset generator.
+  **Please regenerate your training data after updating.** Objects that are dropped onto the
+  ground (cans, tissues) and objects placed tipped over (bicycles, kick scooters, trash cans)
+  had coordinates recorded above their actual position. Content that stays where it is first
+  placed - people, benches, vehicles - was not affected.
+- The annotation format and the submission format are unchanged, so nothing in your code needs
+  to change. This affects training data only and has no effect on competition scoring.
+- To make regenerating the data less tedious, you can now create many scenes in one run. Set
+  `TRAINER_AUTO_SCENES` to the number of scenes you want and they are generated without the GUI.
+  See "Generating many scenes at once" in the technical guide.
+- Each scene is now saved with an inspection image (`<camera>_overlay.png`) that has the
+  ground-truth boxes drawn on it, so a single glance confirms the labels sit on the objects.
+- We confirmed this thanks to a team that verified their generated dataset and sent us example
+  images. Thank you.
+
 ### 2026.R02
 
 - The training data (Dataset Generator GT files) format is unchanged — data and models you have
