@@ -322,6 +322,9 @@ content image.
   See "Generating many scenes at once" in the technical guide.
 - Each scene is now saved with an inspection image (`<camera>_overlay.png`) that has the
   ground-truth boxes drawn on it, so a single glance confirms the labels sit on the objects.
+- We also fixed a difference in rendered brightness between running with the GUI and running
+  without it (`HEADLESS`). Both now produce the same images, matching the competition scoring
+  environment, so either way of generating data is fine.
 - We confirmed this thanks to a team that verified their generated dataset and sent us example
   images. Thank you.
 
